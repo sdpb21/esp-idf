@@ -29,7 +29,7 @@ static inline uint32_t example_angle_to_compare(int angle)
 void app_main(void)
 {
     ESP_LOGI(TAG, "Create timer and operator");
-    mcpwm_timer_handle_t timer = NULL;
+    mcpwm_timer_handle_t timer = NULL;          // creates a null pointer to a struct of type mcpwm_timer_t
     mcpwm_timer_config_t timer_config = {
         .group_id = 0,
         .clk_src = MCPWM_TIMER_CLK_SRC_DEFAULT,
