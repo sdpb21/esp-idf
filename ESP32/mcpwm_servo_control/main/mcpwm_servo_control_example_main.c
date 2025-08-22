@@ -30,7 +30,7 @@ void app_main(void)
 {
     ESP_LOGI(TAG, "Create timer and operator");
     mcpwm_timer_handle_t timer = NULL;          // creates a null pointer to a struct of type mcpwm_timer_t
-    mcpwm_timer_config_t timer_config = {
+    mcpwm_timer_config_t timer_config = {       // initializes the timer configuration struct
         .group_id = 0,
         .clk_src = MCPWM_TIMER_CLK_SRC_DEFAULT,
         .resolution_hz = SERVO_TIMEBASE_RESOLUTION_HZ,
