@@ -29,16 +29,22 @@ static inline uint32_t example_angle_to_compare(int angle)
 void app_main(void)
 {
     ESP_LOGI(TAG, "Create timer and operator");
-    mcpwm_timer_handle_t timer = NULL;          // creates a null pointer to a struct of type mcpwm_timer_t
-    mcpwm_timer_config_t timer_config = {       // initializes the timer configuration struct
+
+    // Step 1: creates a null pointer timer handle
+    mcpwm_timer_handle_t timer = NULL;
+
+    // Step 2: initializes the timer configuration struct
+    mcpwm_timer_config_t timer_config = {
         .group_id = 0,
         .clk_src = MCPWM_TIMER_CLK_SRC_DEFAULT,
         .resolution_hz = SERVO_TIMEBASE_RESOLUTION_HZ,
         .period_ticks = SERVO_TIMEBASE_PERIOD,
         .count_mode = MCPWM_TIMER_COUNT_MODE_UP,
     };
-    ESP_ERROR_CHECK(mcpwm_new_timer(&timer_config, &timer));
 
+    /* Step 3: creates a motor control PWM timer and check the error code,
+       if not ESP_OK, terminates the program */
+    ESP_ERROR_CHECK(mcpwm_new_timer(&timer_config, &timer));
     mcpwm_oper_handle_t oper = NULL;
     mcpwm_operator_config_t operator_config = {
         .group_id = 0, // operator must be in the same group to the timer
