@@ -45,13 +45,25 @@ void app_main(void)
     /* Step 3: creates a motor control PWM timer and check the error code,
        if not ESP_OK, terminates the program */
     ESP_ERROR_CHECK(mcpwm_new_timer(&timer_config, &timer));
+
+    /* Step 4: create a null pointer to a struct of type mcpwm_oper_t (a motor control PWM
+       operator handle) */
     mcpwm_oper_handle_t oper = NULL;
+
+    /* Step 5: create a motor control PWM operator configuration struct and initialize his
+       group_id */
     mcpwm_operator_config_t operator_config = {
         .group_id = 0, // operator must be in the same group to the timer
     };
+
+    /* Step 6: create a motor control PWM operator and check the error code, if not ESP_OK,
+       terminates the program */
     ESP_ERROR_CHECK(mcpwm_new_operator(&operator_config, &oper));
 
     ESP_LOGI(TAG, "Connect timer and operator");
+
+    /* Step 7: Connect the motor control PWM operator and timer, so that the operator can be
+       driven by the timer */
     ESP_ERROR_CHECK(mcpwm_operator_connect_timer(oper, timer));
 
     ESP_LOGI(TAG, "Create comparator and generator from the operator");
