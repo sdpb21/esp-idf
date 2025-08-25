@@ -67,6 +67,9 @@ void app_main(void)
     ESP_ERROR_CHECK(mcpwm_operator_connect_timer(oper, timer));
 
     ESP_LOGI(TAG, "Create comparator and generator from the operator");
+
+    /* Step 8: Define the motor control PWM comparator handle (a pointer to a struct of type
+       mcpwm_cmpr_t) and initialize it as NULL */
     mcpwm_cmpr_handle_t comparator = NULL;
     mcpwm_comparator_config_t comparator_config = {
         .flags.update_cmp_on_tez = true,
