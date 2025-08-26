@@ -71,6 +71,8 @@ void app_main(void)
     /* Step 8: Define the motor control PWM comparator handle (a pointer to a struct of type
        mcpwm_cmpr_t) and initialize it as NULL */
     mcpwm_cmpr_handle_t comparator = NULL;
+
+    /* Step 9: Define the motor control PWM comparator configuration structure */
     mcpwm_comparator_config_t comparator_config = {
         .flags.update_cmp_on_tez = true,
     };
