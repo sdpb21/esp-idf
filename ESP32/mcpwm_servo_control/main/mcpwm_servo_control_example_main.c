@@ -76,6 +76,8 @@ void app_main(void)
     mcpwm_comparator_config_t comparator_config = {
         .flags.update_cmp_on_tez = true,
     };
+
+    /* Step 10: Create the comparator for the operator previously created */
     ESP_ERROR_CHECK(mcpwm_new_comparator(oper, &comparator_config, &comparator));
 
     mcpwm_gen_handle_t generator = NULL;
