@@ -80,10 +80,17 @@ void app_main(void)
     /* Step 10: Create the comparator for the operator previously created */
     ESP_ERROR_CHECK(mcpwm_new_comparator(oper, &comparator_config, &comparator));
 
+    /* Step 11: Define the motor control PWM generator handle (a pointer to a mcpwm_gen_t type
+       struct) */
     mcpwm_gen_handle_t generator = NULL;
+
+    /* Step 12: Define the motor control PWM generator configuration structure */
     mcpwm_generator_config_t generator_config = {
         .gen_gpio_num = SERVO_PULSE_GPIO,
     };
+
+    /* Step 13: Allocates the generator for the previously created operator and check the error
+       code, if not ESP_OK, terminates the program */
     ESP_ERROR_CHECK(mcpwm_new_generator(oper, &generator_config, &generator));
 
     // set the initial compare value, so that the servo will spin to the center position
