@@ -21,10 +21,18 @@ static const char *TAG = "example";
 #define SERVO_TIMEBASE_RESOLUTION_HZ 1000000  // 1MHz, 1us per tick
 #define SERVO_TIMEBASE_PERIOD        20000    // 20000 ticks, 20ms
 
+/*/ This function returns the angle in degrees converted to a value proportional to the pulse 
+    width in microseconds starting from SERVO_MIN_PULSEWIDTH_US */
 static inline uint32_t example_angle_to_compare(int angle)
 {
     return (angle - SERVO_MIN_DEGREE) * (SERVO_MAX_PULSEWIDTH_US - SERVO_MIN_PULSEWIDTH_US) / (SERVO_MAX_DEGREE - SERVO_MIN_DEGREE) + SERVO_MIN_PULSEWIDTH_US;
 }
+
+/*
+    (angle - SERVO_MIN_DEGREE) * (SERVO_MAX_PULSEWIDTH_US - SERVO_MIN_PULSEWIDTH_US)
+    -------------------------------------------------------------------------------- + SERVO_MIN_PULSEWIDTH_US
+                            (SERVO_MAX_DEGREE - SERVO_MIN_DEGREE)
+*/
 
 void app_main(void)
 {
@@ -93,11 +101,14 @@ void app_main(void)
        code, if not ESP_OK, terminates the program */
     ESP_ERROR_CHECK(mcpwm_new_generator(oper, &generator_config, &generator));
 
-    // set the initial compare value, so that the servo will spin to the center position
+    /*/ Step 14: Set the initial compare value, so that the servo will spin to the center 
+        position, the angle is converted to a pulsewidth value in microseconds, also checks
+        the error code */
     ESP_ERROR_CHECK(mcpwm_comparator_set_compare_value(comparator, example_angle_to_compare(0)));
 
     ESP_LOGI(TAG, "Set generator action on timer and compare event");
-    // go high on counter empty
+    
+    /*/ Step 15: Set generator action on timer event: go high on counter empty */
     ESP_ERROR_CHECK(mcpwm_generator_set_action_on_timer_event(generator,
                                                               MCPWM_GEN_TIMER_EVENT_ACTION(MCPWM_TIMER_DIRECTION_UP, MCPWM_TIMER_EVENT_EMPTY, MCPWM_GEN_ACTION_HIGH)));
     // go low on compare threshold
