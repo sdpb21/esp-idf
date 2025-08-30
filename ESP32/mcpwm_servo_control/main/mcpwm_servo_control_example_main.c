@@ -111,7 +111,7 @@ void app_main(void)
     /*/ Step 15: Set generator action on timer event: go high on counter empty */
     ESP_ERROR_CHECK(mcpwm_generator_set_action_on_timer_event(generator,
                                                               MCPWM_GEN_TIMER_EVENT_ACTION(MCPWM_TIMER_DIRECTION_UP, MCPWM_TIMER_EVENT_EMPTY, MCPWM_GEN_ACTION_HIGH)));
-    // go low on compare threshold
+    /*/ Step 16: Set generator action on comparator event: go low on compare threshold */
     ESP_ERROR_CHECK(mcpwm_generator_set_action_on_compare_event(generator,
                                                                 MCPWM_GEN_COMPARE_EVENT_ACTION(MCPWM_TIMER_DIRECTION_UP, comparator, MCPWM_GEN_ACTION_LOW)));
 
