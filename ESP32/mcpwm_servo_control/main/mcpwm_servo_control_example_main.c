@@ -116,13 +116,24 @@ void app_main(void)
                                                                 MCPWM_GEN_COMPARE_EVENT_ACTION(MCPWM_TIMER_DIRECTION_UP, comparator, MCPWM_GEN_ACTION_LOW)));
 
     ESP_LOGI(TAG, "Enable and start timer");
+
+    /* Step 17: Enable the motor control PWM timer defined above */
     ESP_ERROR_CHECK(mcpwm_timer_enable(timer));
+
+    /* Step 18: Send a command to motor control PWM timer to ask him to start counting and don't
+        stop until receives stop command, with the MCPWM_TIMER_START_NO_STOP command */
     ESP_ERROR_CHECK(mcpwm_timer_start_stop(timer, MCPWM_TIMER_START_NO_STOP));
 
+    /* Step 19: Define the initial angle in degrees and his step */
     int angle = 0;
     int step = 2;
+
+    /* Step 20: Increments or decrements the rotating angle value between defined limits */
     while (1) {
         ESP_LOGI(TAG, "Angle of rotation: %d", angle);
+
+        /*/ Set the motor control PWM comparator's compare value to change the PWM frequency and
+            the angle with each while loop iteration */
         ESP_ERROR_CHECK(mcpwm_comparator_set_compare_value(comparator, example_angle_to_compare(angle)));
         //Add delay, since it takes time for servo to rotate, usually 200ms/60degree rotation under 5V power supply
         vTaskDelay(pdMS_TO_TICKS(500));
