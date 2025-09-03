@@ -1,104 +1,205 @@
-/* Blink Example
-
-   This example code is in the Public Domain (or CC0 licensed, at your option.)
-
-   Unless required by applicable law or agreed to in writing, this
-   software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-   CONDITIONS OF ANY KIND, either express or implied.
-*/
-#include <stdio.h>
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
+#include <esp_wifi.h>
+#include <esp_event.h>
+#include <esp_log.h>
+#include <esp_system.h>
+#include <nvs_flash.h>
+#include <sys/param.h>
+#include "esp_netif.h"
+#include "esp_eth.h"
+#include "protocol_examples_common.h"
+#include <esp_https_server.h>
+#include "esp_tls.h"
+#include <string.h>
 #include "driver/gpio.h"
-#include "esp_log.h"
-#include "led_strip.h"
-#include "sdkconfig.h"
+#include <stdio.h>
 
-static const char *TAG = "example";
 
-/* Use project configuration menu (idf.py menuconfig) to choose the GPIO to blink,
-   or you can edit the following line and set a number here.
-*/
-#define BLINK_GPIO CONFIG_BLINK_GPIO
+#define ledR 33
+#define ledG 25
+#define ledB 26
 
-static uint8_t s_led_state = 0;
 
-#ifdef CONFIG_BLINK_LED_STRIP
+int8_t led_r_state = 0;
+int8_t led_g_state = 0;
+int8_t led_b_state = 0;
 
-static led_strip_handle_t led_strip;
 
-static void blink_led(void)
+static const char *TAG = "main";
+
+
+esp_err_t init_led(void);
+esp_err_t toggle_led(int led);
+
+
+/* An HTTP GET handler */
+static esp_err_t root_get_handler(httpd_req_t *req)
 {
-    /* If the addressable LED is enabled */
-    if (s_led_state) {
-        /* Set the LED pixel using RGB from 0 (0%) to 255 (100%) for each color */
-        led_strip_set_pixel(led_strip, 0, 16, 16, 16);
-        /* Refresh the strip to send data */
-        led_strip_refresh(led_strip);
-    } else {
-        /* Set all LED off to clear all pixels */
-        led_strip_clear(led_strip);
+    extern unsigned char view_start[] asm("_binary_view_html_start");
+    extern unsigned char view_end[] asm("_binary_view_html_end");
+    size_t view_len = view_end - view_start;
+    char viewHtml[view_len];
+    memcpy(viewHtml, view_start, view_len);
+    ESP_LOGI(TAG, "URI: %s", req->uri);
+
+
+    if (strcmp(req->uri, "/?led-r") == 0)
+    {
+        toggle_led(ledR);
+    }
+    if (strcmp(req->uri, "/?led-g") == 0)
+    {
+        toggle_led(ledG);
+    }
+    if (strcmp(req->uri, "/?led-b") == 0)
+    {
+        toggle_led(ledB);
+    }
+
+
+    char *viewHtmlUpdated;
+    int formattedStrResult = asprintf(&viewHtmlUpdated, viewHtml, led_r_state ? "ON" : "OFF", led_g_state ? "ON" : "OFF", led_b_state ? "ON" : "OFF");
+
+
+    httpd_resp_set_type(req, "text/html");
+
+
+    if (formattedStrResult > 0)
+    {
+        httpd_resp_send(req, viewHtmlUpdated, view_len);
+        free(viewHtmlUpdated);
+    }
+    else
+    {
+        ESP_LOGE(TAG, "Error updating variables");
+        httpd_resp_send(req, viewHtml, view_len);
+    }
+
+
+    return ESP_OK;
+}
+
+
+static const httpd_uri_t root = {
+    .uri = "/",
+    .method = HTTP_GET,
+    .handler = root_get_handler};
+
+
+static httpd_handle_t start_webserver(void)
+{
+    httpd_handle_t server = NULL;
+
+
+    // Start the httpd server
+    ESP_LOGI(TAG, "Starting server");
+
+
+    httpd_ssl_config_t conf = HTTPD_SSL_CONFIG_DEFAULT();
+    conf.transport_mode = HTTPD_SSL_TRANSPORT_INSECURE;
+    esp_err_t ret = httpd_ssl_start(&server, &conf);
+    if (ESP_OK != ret)
+    {
+        ESP_LOGI(TAG, "Error starting server!");
+        return NULL;
+    }
+
+
+    // Set URI handlers
+    ESP_LOGI(TAG, "Registering URI handlers");
+    httpd_register_uri_handler(server, &root);
+    return server;
+}
+
+
+static void stop_webserver(httpd_handle_t server)
+{
+    // Stop the httpd server
+    httpd_ssl_stop(server);
+}
+
+
+static void disconnect_handler(void *arg, esp_event_base_t event_base,
+                               int32_t event_id, void *event_data)
+{
+    httpd_handle_t *server = (httpd_handle_t *)arg;
+    if (*server)
+    {
+        stop_webserver(*server);
+        *server = NULL;
     }
 }
 
-static void configure_led(void)
+
+static void connect_handler(void *arg, esp_event_base_t event_base,
+                            int32_t event_id, void *event_data)
 {
-    ESP_LOGI(TAG, "Example configured to blink addressable LED!");
-    /* LED strip initialization with the GPIO and pixels number*/
-    led_strip_config_t strip_config = {
-        .strip_gpio_num = BLINK_GPIO,
-        .max_leds = 1, // at least one LED on board
-    };
-#if CONFIG_BLINK_LED_STRIP_BACKEND_RMT
-    led_strip_rmt_config_t rmt_config = {
-        .resolution_hz = 10 * 1000 * 1000, // 10MHz
-        .flags.with_dma = false,
-    };
-    ESP_ERROR_CHECK(led_strip_new_rmt_device(&strip_config, &rmt_config, &led_strip));
-#elif CONFIG_BLINK_LED_STRIP_BACKEND_SPI
-    led_strip_spi_config_t spi_config = {
-        .spi_bus = SPI2_HOST,
-        .flags.with_dma = true,
-    };
-    ESP_ERROR_CHECK(led_strip_new_spi_device(&strip_config, &spi_config, &led_strip));
-#else
-#error "unsupported LED strip backend"
-#endif
-    /* Set all LED off to clear all pixels */
-    led_strip_clear(led_strip);
+    httpd_handle_t *server = (httpd_handle_t *)arg;
+    if (*server == NULL)
+    {
+        *server = start_webserver();
+    }
 }
 
-#elif CONFIG_BLINK_LED_GPIO
 
-static void blink_led(void)
+esp_err_t init_led(void)
 {
-    /* Set the GPIO level according to the state (LOW or HIGH)*/
-    gpio_set_level(BLINK_GPIO, s_led_state);
+    gpio_config_t pGPIOConfig;
+    pGPIOConfig.pin_bit_mask = (1ULL << ledR) | (1ULL << ledG) | (1ULL << ledB);
+    pGPIOConfig.mode = GPIO_MODE_DEF_OUTPUT;
+    pGPIOConfig.pull_up_en = GPIO_PULLUP_DISABLE;
+    pGPIOConfig.pull_down_en = GPIO_PULLDOWN_DISABLE;
+    pGPIOConfig.intr_type = GPIO_INTR_DISABLE;
+
+
+    gpio_config(&pGPIOConfig);
+
+
+    ESP_LOGI(TAG, "init led completed");
+    return ESP_OK;
 }
 
-static void configure_led(void)
+
+esp_err_t toggle_led(int led)
 {
-    ESP_LOGI(TAG, "Example configured to blink GPIO LED!");
-    gpio_reset_pin(BLINK_GPIO);
-    /* Set the GPIO as a push/pull output */
-    gpio_set_direction(BLINK_GPIO, GPIO_MODE_OUTPUT);
+    int8_t state = 0;
+    switch (led)
+    {
+    case ledR:
+        led_r_state = !led_r_state;
+        state = led_r_state;
+        break;
+    case ledG:
+        led_g_state = !led_g_state;
+        state = led_g_state;
+        break;
+    case ledB:
+        led_b_state = !led_b_state;
+        state = led_b_state;
+        break;
+
+
+    default:
+        gpio_set_level(ledR, 0);
+        gpio_set_level(ledG, 0);
+        gpio_set_level(ledB, 0);
+        led_r_state = 0;
+        led_g_state = 0;
+        led_b_state = 0;
+        break;
+    }
+    gpio_set_level(led, state);
+    return ESP_OK;
 }
 
-#else
-#error "unsupported LED type"
-#endif
 
 void app_main(void)
 {
-
-    /* Configure the peripheral according to the LED type */
-    configure_led();
-
-    while (1) {
-        ESP_LOGI(TAG, "Turning the LED %s!", s_led_state == true ? "ON" : "OFF");
-        blink_led();
-        /* Toggle the LED state */
-        s_led_state = !s_led_state;
-        vTaskDelay(CONFIG_BLINK_PERIOD / portTICK_PERIOD_MS);
-    }
+    ESP_ERROR_CHECK(init_led());
+    static httpd_handle_t server = NULL;
+    ESP_ERROR_CHECK(nvs_flash_init());
+    ESP_ERROR_CHECK(esp_netif_init());
+    ESP_ERROR_CHECK(esp_event_loop_create_default());
+    ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &connect_handler, &server));
+    ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, WIFI_EVENT_STA_DISCONNECTED, &disconnect_handler, &server));
+    ESP_ERROR_CHECK(example_connect());
 }
