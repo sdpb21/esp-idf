@@ -14,6 +14,15 @@
     "idf.toolsPath": "/home/zxcv/.espressif",
     "idf.notificationSilentMode": false,
     "files.associations": {
-        "esp_eth.h": "c"
-    }
+        "esp_eth.h": "c",
+        "gpio.h": "c",
+        "esp_tls.h": "c",
+        "esp_intr_alloc.h": "c",
+        "esp_rom_gpio.h": "c",
+        "esp_intr_types.h": "c",
+        "protocol_examples_common.h": "c",
+        "protocol_examples_utils.h": "c",
+        "esp_log.h": "c"
+    },
+    "idf.flashType": "UART"
 }
