@@ -143,7 +143,7 @@ static void connect_handler(void *arg, esp_event_base_t event_base,
 
 esp_err_t init_led(void)
 {
-    gpio_config_t pGPIOConfig;
+    gpio_config_t pGPIOConfig;  // Declares the struct to config the GPIO
     pGPIOConfig.pin_bit_mask = (1ULL << ledR) | (1ULL << ledG) | (1ULL << ledB);
     pGPIOConfig.mode = GPIO_MODE_DEF_OUTPUT;
     pGPIOConfig.pull_up_en = GPIO_PULLUP_DISABLE;
@@ -194,6 +194,8 @@ esp_err_t toggle_led(int led)
 
 void app_main(void)
 {
+    /*/ Step 1: Configures the GPIO for LED outputs and check for errors, terminates the program 
+        if returned code is not ESP_OK */
     ESP_ERROR_CHECK(init_led());
     static httpd_handle_t server = NULL;
     ESP_ERROR_CHECK(nvs_flash_init());
