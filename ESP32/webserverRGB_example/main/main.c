@@ -143,15 +143,17 @@ static void connect_handler(void *arg, esp_event_base_t event_base,
 
 esp_err_t init_led(void)
 {
-    gpio_config_t pGPIOConfig;  // Declares the struct to config the GPIO
-    pGPIOConfig.pin_bit_mask = (1ULL << ledR) | (1ULL << ledG) | (1ULL << ledB);
-    pGPIOConfig.mode = GPIO_MODE_DEF_OUTPUT;
-    pGPIOConfig.pull_up_en = GPIO_PULLUP_DISABLE;
-    pGPIOConfig.pull_down_en = GPIO_PULLDOWN_DISABLE;
-    pGPIOConfig.intr_type = GPIO_INTR_DISABLE;
+    gpio_config_t pGPIOConfig;                          // Declares the struct to config the GPIO
+    pGPIOConfig.pin_bit_mask = (1ULL << ledR)           // Set pins to be used
+                             | (1ULL << ledG) 
+                             | (1ULL << ledB);
+    pGPIOConfig.mode = GPIO_MODE_DEF_OUTPUT;            // GPIO pins as outputs
+    pGPIOConfig.pull_up_en = GPIO_PULLUP_DISABLE;       // GPIO pull-up resistors disabled
+    pGPIOConfig.pull_down_en = GPIO_PULLDOWN_DISABLE;   // GPIO pull-down resistors disabled
+    pGPIOConfig.intr_type = GPIO_INTR_DISABLE;          // GPIO interruptions disabled
 
 
-    gpio_config(&pGPIOConfig);
+    gpio_config(&pGPIOConfig);                          // Configures the GPIO pins
 
 
     ESP_LOGI(TAG, "init led completed");
@@ -197,6 +199,8 @@ void app_main(void)
     /*/ Step 1: Configures the GPIO for LED outputs and check for errors, terminates the program 
         if returned code is not ESP_OK */
     ESP_ERROR_CHECK(init_led());
+
+    // Step 2: Declare an HTTP Server instance handle as NULL
     static httpd_handle_t server = NULL;
     ESP_ERROR_CHECK(nvs_flash_init());
     ESP_ERROR_CHECK(esp_netif_init());
