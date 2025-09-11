@@ -206,8 +206,16 @@ void app_main(void)
     /*/ Step 3: Initialize the default NVS partition and check for errors, terminates the program
         if returned code is not ESP_OK */
     ESP_ERROR_CHECK(nvs_flash_init());
+
+    /* Step 4: Initialize the underlying TCP/IP stack and check for errors, terminates the program
+        if returned code is not ESP_OK */
     ESP_ERROR_CHECK(esp_netif_init());
+
+    /* Step 5: Creates the default event loop and check for errors, terminates the program if
+        returned code is not ESP_OK */
     ESP_ERROR_CHECK(esp_event_loop_create_default());
+
+    /* Step 6: */
     ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &connect_handler, &server));
     ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, WIFI_EVENT_STA_DISCONNECTED, &disconnect_handler, &server));
     ESP_ERROR_CHECK(example_connect());
