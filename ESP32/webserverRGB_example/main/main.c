@@ -215,9 +215,12 @@ void app_main(void)
         returned code is not ESP_OK */
     ESP_ERROR_CHECK(esp_event_loop_create_default());
 
-    /* Step 6: Register an event handler to the system event loop (legacy) and check for errors,
-        terminates the program if returned code in not ESP_OK */
+    /* Step 6: Register an event handler to start server when wifi is connected and check for 
+        errors, terminates the program if returned code is not ESP_OK */
     ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &connect_handler, &server));
+
+    /* Step 7: Register an event handler to stop the server when wifi is disconnected and check
+        for errors, terminates the program if returned code is not ESP_OK */
     ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, WIFI_EVENT_STA_DISCONNECTED, &disconnect_handler, &server));
     ESP_ERROR_CHECK(example_connect());
 }
