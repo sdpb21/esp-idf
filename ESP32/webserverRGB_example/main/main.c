@@ -222,5 +222,18 @@ void app_main(void)
     /* Step 7: Register an event handler to stop the server when wifi is disconnected and check
         for errors, terminates the program if returned code is not ESP_OK */
     ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, WIFI_EVENT_STA_DISCONNECTED, &disconnect_handler, &server));
+
+    /* Step 8: Configure Wi-Fi or Ethernet, connect, wait for IP and check for errors, terminates
+        the program if returned code is not ESP_OK.
+        
+        This all-in-one helper function is used in protocols examples to
+        reduce the amount of boilerplate in the example.
+        
+        It is not intended to be used in real world applications.
+        See examples under examples/wifi/getting_started/ and examples/ethernet/
+        for more complete Wi-Fi or Ethernet initialization code.
+        
+        Read "Establishing Wi-Fi or Ethernet Connection" section in
+        examples/protocols/README.md for more information about this function. */
     ESP_ERROR_CHECK(example_connect());
 }
