@@ -203,8 +203,8 @@ void app_main(void)
     // Step 2: Declare an HTTP Server instance handle as NULL
     static httpd_handle_t server = NULL;
 
-    /*/ Step 3: Initialize the default NVS partition and check for errors, terminates the program
-        if returned code is not ESP_OK */
+    /*/ Step 3: Initialize the default NVS partition (this is for storing the wifi credentials in
+        flash) and check for errors, terminates the program if returned code is not ESP_OK */
     ESP_ERROR_CHECK(nvs_flash_init());
 
     /* Step 4: Initialize the underlying TCP/IP stack and check for errors, terminates the program
