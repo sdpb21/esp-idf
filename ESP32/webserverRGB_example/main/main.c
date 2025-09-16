@@ -129,7 +129,7 @@ static void disconnect_handler(void *arg, esp_event_base_t event_base,
     }
 }
 
-
+// Handler function that is called to start the webserver when wifi is connected
 static void connect_handler(void *arg, esp_event_base_t event_base,
                             int32_t event_id, void *event_data)
 {
