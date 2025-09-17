@@ -93,8 +93,10 @@ static httpd_handle_t start_webserver(void)
     // Start the httpd server
     ESP_LOGI(TAG, "Starting server");
 
-
+    // Define and initialize an HTTPS server config struct, with default values
     httpd_ssl_config_t conf = HTTPD_SSL_CONFIG_DEFAULT();
+    /*/ Transport mode insecure (SSL disabled) to start the server without SSL, this is used for
+        testing or to use it in trusted environments where you prefer speed over security */
     conf.transport_mode = HTTPD_SSL_TRANSPORT_INSECURE;
     esp_err_t ret = httpd_ssl_start(&server, &conf);
     if (ESP_OK != ret)
