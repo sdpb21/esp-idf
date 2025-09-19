@@ -98,8 +98,9 @@ static httpd_handle_t start_webserver(void)
     /*/ Transport mode insecure (SSL disabled) to start the server without SSL, this is used for
         testing or to use it in trusted environments where you prefer speed over security */
     conf.transport_mode = HTTPD_SSL_TRANSPORT_INSECURE;
-    // Creates a SSL capable HTTP server (SSL is diabled this time)
+    // Creates a SSL (Secure Sockets Layer) capable HTTP server (SSL is diabled this time)
     esp_err_t ret = httpd_ssl_start(&server, &conf);
+    // If there is an error starting the server, exit
     if (ESP_OK != ret)
     {
         ESP_LOGI(TAG, "Error starting server!");
@@ -109,6 +110,7 @@ static httpd_handle_t start_webserver(void)
 
     // Set URI handlers
     ESP_LOGI(TAG, "Registering URI handlers");
+    // Registers an URI (Uniform Resource Identifier) handler
     httpd_register_uri_handler(server, &root);
     return server;
 }
