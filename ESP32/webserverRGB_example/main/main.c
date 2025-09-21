@@ -32,6 +32,7 @@ esp_err_t toggle_led(int led);
 
 
 /* An HTTP GET handler */
+// Handler function registered in URI structure, to be called with a supported request method
 static esp_err_t root_get_handler(httpd_req_t *req)
 {
     extern unsigned char view_start[] asm("_binary_view_html_start");
