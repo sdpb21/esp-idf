@@ -35,6 +35,17 @@ esp_err_t toggle_led(int led);
 // Handler function registered in URI structure, to be called with a supported request method
 static esp_err_t root_get_handler(httpd_req_t *req)
 {
+    /*/ The next 2 lines are useful in case you wish to make a file with binary or text data to be
+        available to your component and you don't want to reformat the file as a C source, in our
+        case we want to embed the html code stored in the view.html file, we must first specify the
+        argument EMBED_TXTFILES in the component registration (CMakeLists.txt file) as follows:
+        
+        idf_component_register(...
+                    EMBED_TXTFILES "view.html")
+        
+        This will embed the contents of the text file wiew.html as a null-terminated string. The
+        file contents will be added to the .rodata section in flash memory, and are available via
+        symbol names as can be read in the next 2 lines:*/
     extern unsigned char view_start[] asm("_binary_view_html_start");
     extern unsigned char view_end[] asm("_binary_view_html_end");
     size_t view_len = view_end - view_start;
