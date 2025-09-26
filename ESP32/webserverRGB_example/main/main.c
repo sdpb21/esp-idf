@@ -48,8 +48,11 @@ static esp_err_t root_get_handler(httpd_req_t *req)
         symbol names as can be read in the next 2 lines:*/
     extern unsigned char view_start[] asm("_binary_view_html_start");
     extern unsigned char view_end[] asm("_binary_view_html_end");
+    // Get the lenght of the html file stored as a string
     size_t view_len = view_end - view_start;
-    char viewHtml[view_len];
+    char viewHtml[view_len];                // Creates a string with the lenght of the html file
+    /*/ Next line copy view_len bytes starting from address pointed by view_start to address 
+        pointed by viewHtml */
     memcpy(viewHtml, view_start, view_len);
     ESP_LOGI(TAG, "URI: %s", req->uri);
 
