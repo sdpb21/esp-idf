@@ -16,7 +16,21 @@
         "protocol_examples_common.h": "c",
         "gpio.h": "c",
         "*.inc": "cpp",
-        "*.tcc": "cpp"
+        "*.tcc": "cpp",
+        "string.h": "c",
+        "stdio.h": "c",
+        "cstring": "c",
+        "variant": "c",
+        "*.c": "c",
+        "ssp.h": "c",
+        "cdefs.h": "c",
+        "_default_types.h": "c",
+        "features.h": "c",
+        "_newlib_version.h": "c",
+        "limits.h": "c",
+        "requires_hosted.h": "c",
+        "c++config.h": "c",
+        "climits": "c"
     },
     "idf.notificationSilentMode": false
 }
