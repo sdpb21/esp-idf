@@ -56,15 +56,17 @@ static esp_err_t root_get_handler(httpd_req_t *req)
     memcpy(viewHtml, view_start, view_len);
     ESP_LOGI(TAG, "URI: %s", req->uri);
 
-
+    // This turns on or off the red LED according to his actual state
     if (strcmp(req->uri, "/?led-r") == 0)
     {
         toggle_led(ledR);
     }
+    // This turns on or off the green LED according to his actual state
     if (strcmp(req->uri, "/?led-g") == 0)
     {
         toggle_led(ledG);
     }
+    // This turns on or off the blue LED according to his actual state
     if (strcmp(req->uri, "/?led-b") == 0)
     {
         toggle_led(ledB);
