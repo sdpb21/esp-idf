@@ -72,8 +72,11 @@ static esp_err_t root_get_handler(httpd_req_t *req)
         toggle_led(ledB);
     }
 
-
-    char *viewHtmlUpdated;
+    char *viewHtmlUpdated;  // Pointer to a char
+    /*/ Allocates a storage large enough to hold the output (viewHtml) including the terminated 
+        null, returns a pointer to that storage via the first argument (viewHtmlUpdated), the 
+        pointer should be passed to free to release the allocated storage when it's no longer
+        needed. Returns the number of characters written */
     int formattedStrResult = asprintf(&viewHtmlUpdated, viewHtml, led_r_state ? "ON" : "OFF", led_g_state ? "ON" : "OFF", led_b_state ? "ON" : "OFF");
 
 
