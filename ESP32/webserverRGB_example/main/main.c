@@ -83,9 +83,10 @@ static esp_err_t root_get_handler(httpd_req_t *req)
         sent out until any of the send APIs is executed */
     httpd_resp_set_type(req, "text/html");
 
-
+    // If the number of characters returned by asprintf is greater than 0, then...
     if (formattedStrResult > 0)
     {
+        // Send a complete HTML response, assumes that the entire response is in a buffer (viewHtmlUpdated)
         httpd_resp_send(req, viewHtmlUpdated, view_len);
         free(viewHtmlUpdated);
     }
