@@ -188,7 +188,7 @@ esp_err_t init_led(void)
     return ESP_OK;
 }
 
-
+// Function to turn on and off LEDs
 esp_err_t toggle_led(int led)
 {
     int8_t state = 0;
