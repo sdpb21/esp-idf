@@ -238,6 +238,91 @@ static void rgb_example_wifi_start(void)
     ESP_ERROR_CHECK(esp_wifi_start());
 }
 
+static void rgb_example_handler_on_wifi_disconnect(void *arg, esp_event_base_t event_base,
+                               int32_t event_id, void *event_data)
+{
+    s_retry_num++;
+    if (s_retry_num > CONFIG_EXAMPLE_WIFI_CONN_MAX_RETRY) {
+        ESP_LOGI(TAG, "WiFi Connect failed %d times, stop reconnect.", s_retry_num);
+        /* let example_wifi_sta_do_connect() return */
+        if (s_semph_get_ip_addrs) {
+            xSemaphoreGive(s_semph_get_ip_addrs);
+        }
+#if CONFIG_EXAMPLE_CONNECT_IPV6
+        if (s_semph_get_ip6_addrs) {
+            xSemaphoreGive(s_semph_get_ip6_addrs);
+        }
+#endif
+        rgb_example_wifi_sta_do_disconnect();   // defined
+        return;
+    }
+    wifi_event_sta_disconnected_t *disconn = event_data;
+    if (disconn->reason == WIFI_REASON_ROAMING) {
+        ESP_LOGD(TAG, "station roaming, do nothing");
+        return;
+    }
+    ESP_LOGI(TAG, "Wi-Fi disconnected %d, trying to reconnect...", disconn->reason);
+    esp_err_t err = esp_wifi_connect();
+    if (err == ESP_ERR_WIFI_NOT_STARTED) {
+        return;
+    }
+    ESP_ERROR_CHECK(err);
+}
+
+/**
+ * @brief Checks the netif description if it contains specified prefix.
+ * All netifs created within common connect component are prefixed with the module TAG,
+ * so it returns true if the specified netif is owned by this module
+ */
+bool rgb_example_is_our_netif(const char *prefix, esp_netif_t *netif)
+{
+    return strncmp(prefix, esp_netif_get_desc(netif), strlen(prefix) - 1) == 0;
+}
+
+static void rgb_example_handler_on_sta_got_ip(void *arg, esp_event_base_t event_base,
+                      int32_t event_id, void *event_data)
+{
+    s_retry_num = 0;
+    ip_event_got_ip_t *event = (ip_event_got_ip_t *)event_data;
+    if (!rgb_example_is_our_netif(EXAMPLE_NETIF_DESC_STA, event->esp_netif)) {  // defined
+        return;
+    }
+    ESP_LOGI(TAG, "Got IPv4 event: Interface \"%s\" address: " IPSTR, esp_netif_get_desc(event->esp_netif), IP2STR(&event->ip_info.ip));
+    if (s_semph_get_ip_addrs) {
+        xSemaphoreGive(s_semph_get_ip_addrs);
+    } else {
+        ESP_LOGI(TAG, "- IPv4 address: " IPSTR ",", IP2STR(&event->ip_info.ip));
+    }
+}
+
+static void rgb_example_handler_on_wifi_connect(void *esp_netif, esp_event_base_t event_base,
+                            int32_t event_id, void *event_data)
+{
+#if CONFIG_EXAMPLE_CONNECT_IPV6
+    esp_netif_create_ip6_linklocal(esp_netif);
+#endif // CONFIG_EXAMPLE_CONNECT_IPV6
+}
+
+static void rgb_example_handler_on_sta_got_ipv6(void *arg, esp_event_base_t event_base,
+                        int32_t event_id, void *event_data)
+{
+    ip_event_got_ip6_t *event = (ip_event_got_ip6_t *)event_data;
+    if (!rgb_example_is_our_netif(EXAMPLE_NETIF_DESC_STA, event->esp_netif)) {  // defined
+        return;
+    }
+    esp_ip6_addr_type_t ipv6_type = esp_netif_ip6_get_addr_type(&event->ip6_info.ip);
+    ESP_LOGI(TAG, "Got IPv6 event: Interface \"%s\" address: " IPV6STR ", type: %s", esp_netif_get_desc(event->esp_netif),
+             IPV62STR(event->ip6_info.ip), example_ipv6_addr_types_to_str[ipv6_type]);
+
+    if (ipv6_type == EXAMPLE_CONNECT_PREFERRED_IPV6_TYPE) {
+        if (s_semph_get_ip6_addrs) {
+            xSemaphoreGive(s_semph_get_ip6_addrs);
+        } else {
+            ESP_LOGI(TAG, "- IPv6 address: " IPV6STR ", type: %s", IPV62STR(event->ip6_info.ip), example_ipv6_addr_types_to_str[ipv6_type]);
+        }
+    }
+}
+
 static esp_err_t rgb_example_wifi_sta_do_connect(wifi_config_t wifi_config, bool wait)
 {
     if (wait) {
@@ -254,11 +339,15 @@ static esp_err_t rgb_example_wifi_sta_do_connect(wifi_config_t wifi_config, bool
 #endif
     }
     s_retry_num = 0;
-    ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, WIFI_EVENT_STA_DISCONNECTED, &example_handler_on_wifi_disconnect, NULL));
-    ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &example_handler_on_sta_got_ip, NULL));
-    ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, WIFI_EVENT_STA_CONNECTED, &example_handler_on_wifi_connect, s_example_sta_netif));
+    // handler defined
+    ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, WIFI_EVENT_STA_DISCONNECTED, &rgb_example_handler_on_wifi_disconnect, NULL));
+    // handler defined
+    ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &rgb_example_handler_on_sta_got_ip, NULL));
+    // handler defined
+    ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, WIFI_EVENT_STA_CONNECTED, &rgb_example_handler_on_wifi_connect, s_example_sta_netif));
 #if CONFIG_EXAMPLE_CONNECT_IPV6
-    ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, IP_EVENT_GOT_IP6, &example_handler_on_sta_got_ipv6, NULL));
+    // handler defined
+    ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, IP_EVENT_GOT_IP6, &rgb_example_handler_on_sta_got_ipv6, NULL));
 #endif
 
     ESP_LOGI(TAG, "Connecting to %s...", wifi_config.sta.ssid);
@@ -306,11 +395,15 @@ static esp_err_t rgb_example_wifi_connect(void)
 
 static esp_err_t rgb_example_wifi_sta_do_disconnect(void)
 {
-    ESP_ERROR_CHECK(esp_event_handler_unregister(WIFI_EVENT, WIFI_EVENT_STA_DISCONNECTED, &example_handler_on_wifi_disconnect));
-    ESP_ERROR_CHECK(esp_event_handler_unregister(IP_EVENT, IP_EVENT_STA_GOT_IP, &example_handler_on_sta_got_ip));
-    ESP_ERROR_CHECK(esp_event_handler_unregister(WIFI_EVENT, WIFI_EVENT_STA_CONNECTED, &example_handler_on_wifi_connect));
+    // handler defined
+    ESP_ERROR_CHECK(esp_event_handler_unregister(WIFI_EVENT, WIFI_EVENT_STA_DISCONNECTED, &rgb_example_handler_on_wifi_disconnect));
+    // handler defined
+    ESP_ERROR_CHECK(esp_event_handler_unregister(IP_EVENT, IP_EVENT_STA_GOT_IP, &rgb_example_handler_on_sta_got_ip));
+    // handler defined
+    ESP_ERROR_CHECK(esp_event_handler_unregister(WIFI_EVENT, WIFI_EVENT_STA_CONNECTED, &rgb_example_handler_on_wifi_connect));
 #if CONFIG_EXAMPLE_CONNECT_IPV6
-    ESP_ERROR_CHECK(esp_event_handler_unregister(IP_EVENT, IP_EVENT_GOT_IP6, &example_handler_on_sta_got_ipv6));
+    // handler defined
+    ESP_ERROR_CHECK(esp_event_handler_unregister(IP_EVENT, IP_EVENT_GOT_IP6, &rgb_example_handler_on_sta_got_ipv6));
 #endif
     if (s_semph_get_ip_addrs) {
         vSemaphoreDelete(s_semph_get_ip_addrs);
