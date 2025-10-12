@@ -223,6 +223,8 @@ esp_err_t toggle_led(int led)
 
 static void rgb_example_wifi_start(void)
 {
+    /*/ Initializes the configuration structure parameters with default values to be passed to
+        esp_wifi_init call */
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
     ESP_ERROR_CHECK(esp_wifi_init(&cfg));
 
