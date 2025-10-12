@@ -30,7 +30,10 @@
         "limits.h": "c",
         "requires_hosted.h": "c",
         "c++config.h": "c",
-        "climits": "c"
+        "climits": "c",
+        "compare": "cpp",
+        "cstdint": "cpp",
+        "format": "cpp"
     },
     "idf.notificationSilentMode": false,
     "idf.port": "/dev/ttyUSB0",
