@@ -226,6 +226,15 @@ static void rgb_example_wifi_start(void)
     /*/ Initializes the configuration structure parameters with default values to be passed to
         esp_wifi_init call */
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+    /** Initializes the Wifi, allocates resources for wifi drivers such as wifi control structure,
+     *  RX/TX buffer, wifi NVS structure, etc. Also starts wifi task. This API must be called 
+     *  before all other WiFi APIs must be called. You must always use WIFI_INIT_CONFIG_DEFAULT to
+     *  set the configuration default values, this guarantee that all the fields get the right
+     *  value when more fields are added to wifi_init_config_t structure in a future release. If
+     *  you want to set your own initial values, overwrite the default values which are set by
+     *  WIFI_INIT_CONFIG_DEFAULT. Please be notified that the field 'magic' of wifi_init_config_t
+     *  should always be WIFI_INIT_CONFIG_MAGIC! (THIS IS WEIRD, DIG INTO THIS IN THE FUTURE),
+     *  and check for errors */
     ESP_ERROR_CHECK(esp_wifi_init(&cfg));
 
     esp_netif_inherent_config_t esp_netif_config = ESP_NETIF_INHERENT_DEFAULT_WIFI_STA();
