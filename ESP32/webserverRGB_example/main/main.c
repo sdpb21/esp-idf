@@ -237,6 +237,8 @@ static void rgb_example_wifi_start(void)
      *  and check for errors */
     ESP_ERROR_CHECK(esp_wifi_init(&cfg));
 
+    /*/ Define an ESP-netif (NETwork InterFace) inherent config struct and initializes it with
+         default parameters */
     esp_netif_inherent_config_t esp_netif_config = ESP_NETIF_INHERENT_DEFAULT_WIFI_STA();
     // Warning: the interface desc is used in tests to capture actual connection details (IP, gw, mask)
     esp_netif_config.if_desc = EXAMPLE_NETIF_DESC_STA;
