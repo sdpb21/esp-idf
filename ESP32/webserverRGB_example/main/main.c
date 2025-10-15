@@ -240,9 +240,15 @@ static void rgb_example_wifi_start(void)
     /*/ Define an ESP-netif (NETwork InterFace) inherent config struct and initializes it with
          default parameters */
     esp_netif_inherent_config_t esp_netif_config = ESP_NETIF_INHERENT_DEFAULT_WIFI_STA();
-    // Warning: the interface desc is used in tests to capture actual connection details (IP, gw, mask)
+    /*/ Warning: the interface desc is used in tests to capture actual connection details (IP, gw,
+         mask) */
+    // Change the interface description initialized with ESP_NETIF_INHERENT_DEFAULT_WIFI_STA
     esp_netif_config.if_desc = EXAMPLE_NETIF_DESC_STA;
+    /*/ Change the priority of the interface from it's default value setted with ESP_NETIF_INHERENT
+        _DEFAULT_WIFI_STA to 128, the higher the value, the higher the priority */
     esp_netif_config.route_prio = 128;
+    /*/ Creates esp_netif WiFi object of STATION type, based on the custom configuration and 
+        returns a pointer to the esp_netif instance */
     s_example_sta_netif = esp_netif_create_wifi(WIFI_IF_STA, &esp_netif_config);
     esp_wifi_set_default_wifi_sta_handlers();
 
