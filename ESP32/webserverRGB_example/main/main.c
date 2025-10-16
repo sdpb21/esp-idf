@@ -250,6 +250,7 @@ static void rgb_example_wifi_start(void)
     /*/ Creates esp_netif WiFi object of STATION type, based on the custom configuration and 
         returns a pointer to the esp_netif instance */
     s_example_sta_netif = esp_netif_create_wifi(WIFI_IF_STA, &esp_netif_config);
+    // Set default handlers for station
     esp_wifi_set_default_wifi_sta_handlers();
 
     ESP_ERROR_CHECK(esp_wifi_set_storage(WIFI_STORAGE_RAM));
