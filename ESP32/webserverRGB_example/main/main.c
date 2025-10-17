@@ -253,8 +253,12 @@ static void rgb_example_wifi_start(void)
     // Set default handlers for station
     esp_wifi_set_default_wifi_sta_handlers();
 
+    // Set the WiFi API configuration storage type, the configuration will be stored in memory
     ESP_ERROR_CHECK(esp_wifi_set_storage(WIFI_STORAGE_RAM));
+    // Set the WiFi operating mode as station mode
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
+    /*/ Starts WiFi according to current configuration, creates a station control block ans starts
+        the station because the mode is station */
     ESP_ERROR_CHECK(esp_wifi_start());
 }
 
