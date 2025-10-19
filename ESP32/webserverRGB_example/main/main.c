@@ -350,7 +350,7 @@ static void rgb_example_handler_on_sta_got_ipv6(void *arg, esp_event_base_t even
 static esp_err_t rgb_example_wifi_sta_do_connect(wifi_config_t wifi_config, bool wait)
 {
     if (wait) {
-        s_semph_get_ip_addrs = xSemaphoreCreateBinary();
+        s_semph_get_ip_addrs = xSemaphoreCreateBinary();    // Creates a binary semaphore
         if (s_semph_get_ip_addrs == NULL) {
             return ESP_ERR_NO_MEM;
         }
