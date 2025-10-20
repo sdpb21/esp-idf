@@ -257,7 +257,7 @@ static void rgb_example_wifi_start(void)
     ESP_ERROR_CHECK(esp_wifi_set_storage(WIFI_STORAGE_RAM));
     // Set the WiFi operating mode as station mode
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
-    /*/ Starts WiFi according to current configuration, creates a station control block ans starts
+    /*/ Starts WiFi according to current configuration, creates a station control block and starts
         the station because the mode is station */
     ESP_ERROR_CHECK(esp_wifi_start());
 }
@@ -399,6 +399,7 @@ static esp_err_t rgb_example_wifi_sta_do_connect(wifi_config_t wifi_config, bool
 static esp_err_t rgb_example_wifi_connect(void)
 {
     ESP_LOGI(TAG, "Start example_connect.");
+    // Executes the first steps to start a WiFi connection according to documentation
     rgb_example_wifi_start();           // defined
     wifi_config_t wifi_config = {
         .sta = {
