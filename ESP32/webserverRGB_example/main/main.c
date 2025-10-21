@@ -401,6 +401,7 @@ static esp_err_t rgb_example_wifi_connect(void)
     ESP_LOGI(TAG, "Start example_connect.");
     // Executes the first steps to start a WiFi connection according to documentation
     rgb_example_wifi_start();           // defined
+    // Configures the station device
     wifi_config_t wifi_config = {
         .sta = {
 #if !CONFIG_EXAMPLE_WIFI_SSID_PWD_FROM_STDIN
