@@ -375,6 +375,10 @@ static esp_err_t rgb_example_wifi_sta_do_connect(wifi_config_t wifi_config, bool
 #endif
 
     ESP_LOGI(TAG, "Connecting to %s...", wifi_config.sta.ssid);
+    /** Set the configuration of the WiFi module as station interface with the values given in the
+     *  structure wifi_config and check for errors, if returned value is not ESP_OK, terminates
+     *  the program.
+     * */
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config));
     esp_err_t ret = esp_wifi_connect();
     if (ret != ESP_OK) {
