@@ -380,6 +380,8 @@ static esp_err_t rgb_example_wifi_sta_do_connect(wifi_config_t wifi_config, bool
      *  the program.
      * */
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config));
+    /*  Connects the WiFi station to the access point, this only works in softAP+station and
+        station modes */
     esp_err_t ret = esp_wifi_connect();
     if (ret != ESP_OK) {
         ESP_LOGE(TAG, "WiFi connect failed! ret:%x", ret);
