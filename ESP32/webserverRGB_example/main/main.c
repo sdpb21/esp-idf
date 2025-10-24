@@ -363,7 +363,9 @@ static esp_err_t rgb_example_wifi_sta_do_connect(wifi_config_t wifi_config, bool
 #endif
     }
     s_retry_num = 0;
-    // handler defined
+    /* Registers a WiFi event to the system event loop, when the station is disconnected, the 
+       function rgb_example_handler_on_wifi_disconnect (that is the handler registered) gets
+       called, later, check for errors */
     ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, WIFI_EVENT_STA_DISCONNECTED, &rgb_example_handler_on_wifi_disconnect, NULL));
     // handler defined
     ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &rgb_example_handler_on_sta_got_ip, NULL));
