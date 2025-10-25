@@ -374,7 +374,8 @@ static esp_err_t rgb_example_wifi_sta_do_connect(wifi_config_t wifi_config, bool
        function rgb_example_handler_on_wifi_connect gets called, and then, check for errors */
     ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, WIFI_EVENT_STA_CONNECTED, &rgb_example_handler_on_wifi_connect, s_example_sta_netif));
 #if CONFIG_EXAMPLE_CONNECT_IPV6
-    // handler defined
+    /* Registers an IP event to the system event loop, when the station got an IPv6, the handler
+       function rgb_example_handler_on_sta_got_ipv6 gets called, after that, check for errors */
     ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, IP_EVENT_GOT_IP6, &rgb_example_handler_on_sta_got_ipv6, NULL));
 #endif
 
