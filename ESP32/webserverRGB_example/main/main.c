@@ -350,11 +350,12 @@ static void rgb_example_handler_on_sta_got_ipv6(void *arg, esp_event_base_t even
 static esp_err_t rgb_example_wifi_sta_do_connect(wifi_config_t wifi_config, bool wait)
 {
     if (wait) {
-        s_semph_get_ip_addrs = xSemaphoreCreateBinary();    // Creates a binary semaphore
+        s_semph_get_ip_addrs = xSemaphoreCreateBinary();    // Creates a binary semaphore handle
         if (s_semph_get_ip_addrs == NULL) {
             return ESP_ERR_NO_MEM;
         }
 #if CONFIG_EXAMPLE_CONNECT_IPV6
+        // Creates a binary semaphore handle for IPv6
         s_semph_get_ip6_addrs = xSemaphoreCreateBinary();
         if (s_semph_get_ip6_addrs == NULL) {
             vSemaphoreDelete(s_semph_get_ip_addrs);
@@ -362,6 +363,7 @@ static esp_err_t rgb_example_wifi_sta_do_connect(wifi_config_t wifi_config, bool
         }
 #endif
     }
+    // Clears the number of connection retries
     s_retry_num = 0;
     /* Registers a WiFi event to the system event loop, when the station is disconnected, the 
        function rgb_example_handler_on_wifi_disconnect (that is the handler registered) gets
@@ -395,11 +397,16 @@ static esp_err_t rgb_example_wifi_sta_do_connect(wifi_config_t wifi_config, bool
     if (wait) {
         ESP_LOGI(TAG, "Waiting for IP(s)");
 #if CONFIG_EXAMPLE_CONNECT_IPV4
+        /* Takes the semaphore token for the IPv4 if it's given, if not, waits a quantity of time
+           given in ticks by portMAX_DELAY, for the token to be given */
         xSemaphoreTake(s_semph_get_ip_addrs, portMAX_DELAY);
 #endif
 #if CONFIG_EXAMPLE_CONNECT_IPV6
+        /* Takes the semaphore token for the IPv6 if it's given, if not, waits a quantity of time
+           given in ticks by portMAX_DELAY, for the token to be given */
         xSemaphoreTake(s_semph_get_ip6_addrs, portMAX_DELAY);
 #endif
+        // If number of connection retries is above the maximum configured, return ESP_FAIL
         if (s_retry_num > CONFIG_EXAMPLE_WIFI_CONN_MAX_RETRY) {
             return ESP_FAIL;
         }
@@ -426,6 +433,8 @@ static esp_err_t rgb_example_wifi_connect(void)
         },
     };
 
+    /* Configures the ESP32 as station and try to connect it to the access point previously
+       configured, returns ESP_OK if connection was successful */
     return rgb_example_wifi_sta_do_connect(wifi_config, true);  // defined
 
 }
