@@ -490,9 +490,13 @@ static void rgb_example_print_all_netif_ips(const char *prefix)
 static esp_err_t rgb_example_connect(void)
 {
 #if CONFIG_EXAMPLE_CONNECT_WIFI
+    /* rgb_example_wifi_connect starts the WiFi connection, configures the ESP32 as station and
+       try to connect it to the access point, returns ESP_OK if everything is ok */
     if (rgb_example_wifi_connect() != ESP_OK) { // defined
         return ESP_FAIL;
     }
+    /* Registers a handler function (rgb_example_wifi_shutdown) that gets invoked before the
+       application is restarted using esp_restart function and check for errors */
     ESP_ERROR_CHECK(esp_register_shutdown_handler(&rgb_example_wifi_shutdown)); // handler defined
     rgb_example_print_all_netif_ips(EXAMPLE_NETIF_DESC_STA);                    // defined
 #endif
