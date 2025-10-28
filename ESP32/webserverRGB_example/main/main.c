@@ -498,6 +498,9 @@ static esp_err_t rgb_example_connect(void)
     /* Registers a handler function (rgb_example_wifi_shutdown) that gets invoked before the
        application is restarted using esp_restart function and check for errors */
     ESP_ERROR_CHECK(esp_register_shutdown_handler(&rgb_example_wifi_shutdown)); // handler defined
+    /* Calls to a function that calls to a pointer to a callback function that has as argument the
+       string defined by the EXAMPLE_NETIF_DESC_STA constant and prints all IPs in the TCP/IP
+       context */
     rgb_example_print_all_netif_ips(EXAMPLE_NETIF_DESC_STA);                    // defined
 #endif
 
