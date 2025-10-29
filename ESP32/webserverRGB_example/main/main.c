@@ -441,7 +441,8 @@ static esp_err_t rgb_example_wifi_connect(void)
 
 static esp_err_t rgb_example_wifi_sta_do_disconnect(void)
 {
-    // handler defined
+    /* Unregisters the handler function rgb_example_handler_on_wifi_disconnect previously
+       registered in rgb_example_wifi_sta_do_connect function, after that, check for errors */
     ESP_ERROR_CHECK(esp_event_handler_unregister(WIFI_EVENT, WIFI_EVENT_STA_DISCONNECTED, &rgb_example_handler_on_wifi_disconnect));
     // handler defined
     ESP_ERROR_CHECK(esp_event_handler_unregister(IP_EVENT, IP_EVENT_STA_GOT_IP, &rgb_example_handler_on_sta_got_ip));
