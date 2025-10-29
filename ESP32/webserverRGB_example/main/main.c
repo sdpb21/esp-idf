@@ -145,7 +145,7 @@ static void stop_webserver(httpd_handle_t server)
     httpd_ssl_stop(server);
 }
 
-// Handler function to stop the webserver when wifi is disconnected
+// Handler function to stop the webserver when station is disconnected from WiFi
 static void disconnect_handler(void *arg, esp_event_base_t event_base,
                                int32_t event_id, void *event_data)
 {
