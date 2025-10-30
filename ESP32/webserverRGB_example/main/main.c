@@ -463,6 +463,7 @@ static esp_err_t rgb_example_wifi_sta_do_disconnect(void)
         vSemaphoreDelete(s_semph_get_ip6_addrs);
     }
 #endif
+    // Disconnects the WiFi station from the Access Point
     return esp_wifi_disconnect();
 }
 
