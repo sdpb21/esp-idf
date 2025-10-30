@@ -277,6 +277,8 @@ static void rgb_example_handler_on_wifi_disconnect(void *arg, esp_event_base_t e
             xSemaphoreGive(s_semph_get_ip6_addrs);
         }
 #endif
+        /* Unregisters the handler functions previously registered, deletes the binary semaphore
+           and disconnects the WiFi station from the access point */
         rgb_example_wifi_sta_do_disconnect();   // defined
         return;
     }
