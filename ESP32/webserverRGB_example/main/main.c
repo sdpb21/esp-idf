@@ -302,6 +302,8 @@ static void rgb_example_handler_on_wifi_disconnect(void *arg, esp_event_base_t e
     if (err == ESP_ERR_WIFI_NOT_STARTED) {
         return;
     }
+    /* Check for the error code returned by a call to esp_wifi_connect() function, terminates the
+       program if code is no ESP_OK */
     ESP_ERROR_CHECK(err);
 }
 
