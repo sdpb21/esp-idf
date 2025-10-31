@@ -293,6 +293,8 @@ static void rgb_example_handler_on_wifi_disconnect(void *arg, esp_event_base_t e
         return;
     }
     ESP_LOGI(TAG, "Wi-Fi disconnected %d, trying to reconnect...", disconn->reason);
+    /*  Connects the WiFi station to the access point, this only works in softAP+station and
+        station modes */
     esp_err_t err = esp_wifi_connect();
     if (err == ESP_ERR_WIFI_NOT_STARTED) {
         return;
