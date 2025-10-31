@@ -296,6 +296,9 @@ static void rgb_example_handler_on_wifi_disconnect(void *arg, esp_event_base_t e
     /*  Connects the WiFi station to the access point, this only works in softAP+station and
         station modes */
     esp_err_t err = esp_wifi_connect();
+    /* The next if block checks for the value returned by esp_wifi_connect() call, if the WiFi was
+       not started by a call to the function esp_wifi_start, then the actual handler function will
+       return */
     if (err == ESP_ERR_WIFI_NOT_STARTED) {
         return;
     }
