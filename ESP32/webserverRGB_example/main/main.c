@@ -286,6 +286,8 @@ static void rgb_example_handler_on_wifi_disconnect(void *arg, esp_event_base_t e
         return;
     }
     wifi_event_sta_disconnected_t *disconn = event_data;
+    /* The next if block checks for the disconnection reason, if the reason is roaming, then
+       returns from the actual function to the point where it was called */
     if (disconn->reason == WIFI_REASON_ROAMING) {
         ESP_LOGD(TAG, "station roaming, do nothing");
         return;
