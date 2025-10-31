@@ -266,6 +266,9 @@ static void rgb_example_handler_on_wifi_disconnect(void *arg, esp_event_base_t e
                                int32_t event_id, void *event_data)
 {
     s_retry_num++;
+    /* The next if block is executed when the actual number of connection retries is bigger than
+       the default maximum number of retries, it gives the binary semaphore and unregisters the
+       handler functions */
     if (s_retry_num > CONFIG_EXAMPLE_WIFI_CONN_MAX_RETRY) {
         ESP_LOGI(TAG, "WiFi Connect failed %d times, stop reconnect.", s_retry_num);
         /* let example_wifi_sta_do_connect() return */
