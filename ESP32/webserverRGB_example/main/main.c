@@ -322,6 +322,8 @@ static void rgb_example_handler_on_sta_got_ip(void *arg, esp_event_base_t event_
 {
     s_retry_num = 0;
     ip_event_got_ip_t *event = (ip_event_got_ip_t *)event_data;
+    /* Next if block returns if the string stored in EXAMPLE_NETIF_DESC_STA is the same as the
+       stored in the network interface description from the event structure */
     if (!rgb_example_is_our_netif(EXAMPLE_NETIF_DESC_STA, event->esp_netif)) {  // defined
         return;
     }
