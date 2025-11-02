@@ -327,6 +327,9 @@ static void rgb_example_handler_on_sta_got_ip(void *arg, esp_event_base_t event_
     if (!rgb_example_is_our_netif(EXAMPLE_NETIF_DESC_STA, event->esp_netif)) {  // defined
         return;
     }
+    /* Prints the network interface description given by the esp_netif_get_desc function call and
+       the IP address given by the IP2STR macro, the IP is stored in a utint32_t type number in
+       different bytes and the macro returns those bytes separated */
     ESP_LOGI(TAG, "Got IPv4 event: Interface \"%s\" address: " IPSTR, esp_netif_get_desc(event->esp_netif), IP2STR(&event->ip_info.ip));
     if (s_semph_get_ip_addrs) {
         xSemaphoreGive(s_semph_get_ip_addrs);
