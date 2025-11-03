@@ -358,6 +358,8 @@ static void rgb_example_handler_on_sta_got_ipv6(void *arg, esp_event_base_t even
         return;
     }
     esp_ip6_addr_type_t ipv6_type = esp_netif_ip6_get_addr_type(&event->ip6_info.ip);
+    /* Prints the network interface description given by the esp_netif_get_desc function call and
+       the IPv6 address given by the IPV62STR macro */
     ESP_LOGI(TAG, "Got IPv6 event: Interface \"%s\" address: " IPV6STR ", type: %s", esp_netif_get_desc(event->esp_netif),
              IPV62STR(event->ip6_info.ip), example_ipv6_addr_types_to_str[ipv6_type]);
 
