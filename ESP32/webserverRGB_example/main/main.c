@@ -481,11 +481,11 @@ static esp_err_t rgb_example_wifi_sta_do_disconnect(void)
     ESP_ERROR_CHECK(esp_event_handler_unregister(IP_EVENT, IP_EVENT_GOT_IP6, &rgb_example_handler_on_sta_got_ipv6));
 #endif
     if (s_semph_get_ip_addrs) {
-        vSemaphoreDelete(s_semph_get_ip_addrs);
+        vSemaphoreDelete(s_semph_get_ip_addrs); // Deletes the IPv4 semaphore if it was created
     }
 #if CONFIG_EXAMPLE_CONNECT_IPV6
     if (s_semph_get_ip6_addrs) {
-        vSemaphoreDelete(s_semph_get_ip6_addrs);
+        vSemaphoreDelete(s_semph_get_ip6_addrs); // Deletes the IPv6 semaphore if it was created
     }
 #endif
     // Disconnects the WiFi station from the Access Point
