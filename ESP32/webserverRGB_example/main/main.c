@@ -494,6 +494,7 @@ static esp_err_t rgb_example_wifi_sta_do_disconnect(void)
 
 static void rgb_example_wifi_stop(void)
 {
+    /* Stops the WiFi station and frees the station control block */
     esp_err_t err = esp_wifi_stop();
     if (err == ESP_ERR_WIFI_NOT_INIT) {
         return;
