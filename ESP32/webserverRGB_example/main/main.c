@@ -496,10 +496,13 @@ static void rgb_example_wifi_stop(void)
 {
     /* Stops the WiFi station and frees the station control block */
     esp_err_t err = esp_wifi_stop();
+    // if esp_wifi_init function wasn't executed yet, then returns
     if (err == ESP_ERR_WIFI_NOT_INIT) {
         return;
     }
+    // Check the value returned by esp_wifi_stop for errors, if not ESP_OK, stops the program
     ESP_ERROR_CHECK(err);
+    // Free all resources allocated in esp_wifi_init and stop WiFi task
     ESP_ERROR_CHECK(esp_wifi_deinit());
     ESP_ERROR_CHECK(esp_wifi_clear_default_wifi_driver_and_handlers(s_example_sta_netif));
     esp_netif_destroy(s_example_sta_netif);
