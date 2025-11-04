@@ -502,8 +502,10 @@ static void rgb_example_wifi_stop(void)
     }
     // Check the value returned by esp_wifi_stop for errors, if not ESP_OK, stops the program
     ESP_ERROR_CHECK(err);
-    // Free all resources allocated in esp_wifi_init and stop WiFi task
+    // Free all resources allocated in esp_wifi_init and stop WiFi task and check for errors
     ESP_ERROR_CHECK(esp_wifi_deinit());
+    /* Clears default wifi event handlers for supplied network interface (NETIF) and check for
+       errors, stops the program if not ESP_OK */
     ESP_ERROR_CHECK(esp_wifi_clear_default_wifi_driver_and_handlers(s_example_sta_netif));
     esp_netif_destroy(s_example_sta_netif);
     s_example_sta_netif = NULL;
