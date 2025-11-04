@@ -507,6 +507,8 @@ static void rgb_example_wifi_stop(void)
 
 void rgb_example_wifi_shutdown(void)
 {
+    /* Unregisters the handler functions previously registered, deletes the binary semaphore
+       and disconnects the WiFi station from the access point */
     rgb_example_wifi_sta_do_disconnect();   // defined
     rgb_example_wifi_stop();                // defined
 }
