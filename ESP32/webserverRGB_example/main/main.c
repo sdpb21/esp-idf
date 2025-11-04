@@ -509,6 +509,7 @@ static void rgb_example_wifi_stop(void)
     ESP_ERROR_CHECK(esp_wifi_clear_default_wifi_driver_and_handlers(s_example_sta_netif));
     // Destroys the esp_netif object
     esp_netif_destroy(s_example_sta_netif);
+    // Sets the esp_netif object to NULL
     s_example_sta_netif = NULL;
 }
 
@@ -517,6 +518,9 @@ void rgb_example_wifi_shutdown(void)
     /* Unregisters the handler functions previously registered, deletes the binary semaphore
        and disconnects the WiFi station from the access point */
     rgb_example_wifi_sta_do_disconnect();   // defined
+    /* Stops the WiFi station and frees the station control block, frees all resources allocated
+       in esp_wifi_init and stops WiFi task, clears default wifi event handlers for supplied
+       network interface (NETIF) and destroys the esp_netif object */
     rgb_example_wifi_stop();                // defined
 }
 
