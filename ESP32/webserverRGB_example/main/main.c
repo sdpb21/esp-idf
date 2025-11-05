@@ -26,7 +26,9 @@ int8_t led_r_state = 0;
 int8_t led_g_state = 0;
 int8_t led_b_state = 0;
 
+#if CONFIG_EXAMPLE_CONNECT_WIFI
 
+static esp_netif_t *s_example_sta_netif = NULL;
 static const char *TAG = "main";
 
 
@@ -552,6 +554,8 @@ static esp_err_t rgb_example_connect(void)
 
     return ESP_OK;
 }
+
+#endif /* CONFIG_EXAMPLE_CONNECT_WIFI */
 
 void app_main(void)
 {
