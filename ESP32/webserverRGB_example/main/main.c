@@ -6,7 +6,7 @@
 #include <sys/param.h>
 #include "esp_netif.h"
 #include "esp_eth.h"
-#include "protocol_examples_common.h"
+//#include "protocol_examples_common.h"
 #include <esp_https_server.h>
 #include "esp_tls.h"
 #include <string.h>
@@ -35,7 +35,7 @@ static SemaphoreHandle_t s_semph_get_ip6_addrs = NULL;
 
 esp_err_t init_led(void);
 esp_err_t toggle_led(int led);
-
+static esp_err_t rgb_example_wifi_sta_do_disconnect(void);
 
 /* An HTTP GET handler */
 // Handler function registered in URI structure, to be called with a supported request method
@@ -470,34 +470,6 @@ static esp_err_t rgb_example_wifi_connect(void)
 
 }
 
-static esp_err_t rgb_example_wifi_sta_do_disconnect(void)
-{
-    /* Unregisters the handler function rgb_example_handler_on_wifi_disconnect previously
-       registered in rgb_example_wifi_sta_do_connect function, after that, check for errors */
-    ESP_ERROR_CHECK(esp_event_handler_unregister(WIFI_EVENT, WIFI_EVENT_STA_DISCONNECTED, &rgb_example_handler_on_wifi_disconnect));
-    /* Unregisters the handler function rgb_example_handler_on_sta_got_ip previously registered in
-       rgb_example_wifi_sta_do_connect function and check for errors */
-    ESP_ERROR_CHECK(esp_event_handler_unregister(IP_EVENT, IP_EVENT_STA_GOT_IP, &rgb_example_handler_on_sta_got_ip));
-    /* Unregisters the handler function rgb_example_handler_on_wifi_connect previously registered
-       in rgb_example_wifi_sta_do_connect function and check for errors */
-    ESP_ERROR_CHECK(esp_event_handler_unregister(WIFI_EVENT, WIFI_EVENT_STA_CONNECTED, &rgb_example_handler_on_wifi_connect));
-#if CONFIG_EXAMPLE_CONNECT_IPV6
-    /* Unregisters the handler function rgb_example_handler_on_sta_got_ipv6 previously registered
-       in rgb_example_wifi_sta_do_connect function and check for errors */
-    ESP_ERROR_CHECK(esp_event_handler_unregister(IP_EVENT, IP_EVENT_GOT_IP6, &rgb_example_handler_on_sta_got_ipv6));
-#endif
-    if (s_semph_get_ip_addrs) {
-        vSemaphoreDelete(s_semph_get_ip_addrs); // Deletes the IPv4 semaphore if it was created
-    }
-#if CONFIG_EXAMPLE_CONNECT_IPV6
-    if (s_semph_get_ip6_addrs) {
-        vSemaphoreDelete(s_semph_get_ip6_addrs); // Deletes the IPv6 semaphore if it was created
-    }
-#endif
-    // Disconnects the WiFi station from the Access Point
-    return esp_wifi_disconnect();
-}
-
 static void rgb_example_wifi_stop(void)
 {
     /* Stops the WiFi station and frees the station control block */
@@ -554,6 +526,34 @@ static esp_err_t rgb_example_connect(void)
 #endif
 
     return ESP_OK;
+}
+
+static esp_err_t rgb_example_wifi_sta_do_disconnect(void)
+{
+    /* Unregisters the handler function rgb_example_handler_on_wifi_disconnect previously
+       registered in rgb_example_wifi_sta_do_connect function, after that, check for errors */
+    ESP_ERROR_CHECK(esp_event_handler_unregister(WIFI_EVENT, WIFI_EVENT_STA_DISCONNECTED, &rgb_example_handler_on_wifi_disconnect));
+    /* Unregisters the handler function rgb_example_handler_on_sta_got_ip previously registered in
+       rgb_example_wifi_sta_do_connect function and check for errors */
+    ESP_ERROR_CHECK(esp_event_handler_unregister(IP_EVENT, IP_EVENT_STA_GOT_IP, &rgb_example_handler_on_sta_got_ip));
+    /* Unregisters the handler function rgb_example_handler_on_wifi_connect previously registered
+       in rgb_example_wifi_sta_do_connect function and check for errors */
+    ESP_ERROR_CHECK(esp_event_handler_unregister(WIFI_EVENT, WIFI_EVENT_STA_CONNECTED, &rgb_example_handler_on_wifi_connect));
+#if CONFIG_EXAMPLE_CONNECT_IPV6
+    /* Unregisters the handler function rgb_example_handler_on_sta_got_ipv6 previously registered
+       in rgb_example_wifi_sta_do_connect function and check for errors */
+    ESP_ERROR_CHECK(esp_event_handler_unregister(IP_EVENT, IP_EVENT_GOT_IP6, &rgb_example_handler_on_sta_got_ipv6));
+#endif
+    if (s_semph_get_ip_addrs) {
+        vSemaphoreDelete(s_semph_get_ip_addrs); // Deletes the IPv4 semaphore if it was created
+    }
+#if CONFIG_EXAMPLE_CONNECT_IPV6
+    if (s_semph_get_ip6_addrs) {
+        vSemaphoreDelete(s_semph_get_ip6_addrs); // Deletes the IPv6 semaphore if it was created
+    }
+#endif
+    // Disconnects the WiFi station from the Access Point
+    return esp_wifi_disconnect();
 }
 
 #endif /* CONFIG_EXAMPLE_CONNECT_WIFI */
