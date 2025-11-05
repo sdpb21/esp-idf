@@ -13,6 +13,9 @@
 #include "driver/gpio.h"
 #include <stdio.h>
 
+#if CONFIG_EXAMPLE_CONNECT_WIFI
+#define EXAMPLE_NETIF_DESC_STA "example_netif_sta"
+#endif
 
 #define ledR 33
 #define ledG 25
