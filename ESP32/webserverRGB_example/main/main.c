@@ -30,7 +30,7 @@ int8_t led_b_state = 0;
 
 static esp_netif_t *s_example_sta_netif = NULL;
 static const char *TAG = "main";
-
+static int s_retry_num = 0;
 
 esp_err_t init_led(void);
 esp_err_t toggle_led(int led);
