@@ -13,10 +13,6 @@
 #include "driver/gpio.h"
 #include <stdio.h>
 
-#if CONFIG_EXAMPLE_CONNECT_WIFI
-#define EXAMPLE_NETIF_DESC_STA "example_netif_sta"
-#endif
-
 #define ledR 33
 #define ledG 25
 #define ledB 26
@@ -28,9 +24,14 @@ int8_t led_b_state = 0;
 
 #if CONFIG_EXAMPLE_CONNECT_WIFI
 
+#define EXAMPLE_NETIF_DESC_STA "example_netif_sta"
 static esp_netif_t *s_example_sta_netif = NULL;
 static const char *TAG = "main";
 static int s_retry_num = 0;
+static SemaphoreHandle_t s_semph_get_ip_addrs = NULL;
+#if CONFIG_EXAMPLE_CONNECT_IPV6
+static SemaphoreHandle_t s_semph_get_ip6_addrs = NULL;
+#endif
 
 esp_err_t init_led(void);
 esp_err_t toggle_led(int led);
