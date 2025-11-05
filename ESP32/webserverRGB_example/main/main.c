@@ -17,7 +17,6 @@
 #define ledG 25
 #define ledB 26
 
-
 int8_t led_r_state = 0;
 int8_t led_g_state = 0;
 int8_t led_b_state = 0;
@@ -29,8 +28,18 @@ static esp_netif_t *s_example_sta_netif = NULL;
 static const char *TAG = "main";
 static int s_retry_num = 0;
 static SemaphoreHandle_t s_semph_get_ip_addrs = NULL;
+
 #if CONFIG_EXAMPLE_CONNECT_IPV6
 static SemaphoreHandle_t s_semph_get_ip6_addrs = NULL;
+/* types of ipv6 addresses to be displayed on ipv6 events */
+const char *example_ipv6_addr_types_to_str[6] = {
+    "ESP_IP6_ADDR_IS_UNKNOWN",
+    "ESP_IP6_ADDR_IS_GLOBAL",
+    "ESP_IP6_ADDR_IS_LINK_LOCAL",
+    "ESP_IP6_ADDR_IS_SITE_LOCAL",
+    "ESP_IP6_ADDR_IS_UNIQUE_LOCAL",
+    "ESP_IP6_ADDR_IS_IPV4_MAPPED_IPV6"
+};
 #endif
 
 esp_err_t init_led(void);
