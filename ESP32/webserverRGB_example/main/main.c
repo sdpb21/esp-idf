@@ -554,6 +554,16 @@ void rgb_example_wifi_shutdown(void)
     rgb_example_wifi_stop();                // defined
 }
 
+/**
+ * @brief Checks the netif description if it contains specified prefix.
+ * All netifs created within common connect component are prefixed with the module TAG,
+ * so it returns true if the specified netif is owned by this module
+ */
+bool example_is_our_netif(const char *prefix, esp_netif_t *netif)
+{
+    return strncmp(prefix, esp_netif_get_desc(netif), strlen(prefix) - 1) == 0;
+}
+
 static esp_err_t print_all_ips_tcpip(void* ctx)
 {
     const char *prefix = ctx;
@@ -733,7 +743,7 @@ esp_err_t example_connect(void)
             ESP_LOGI(TAG, "Please input ssid password:");
             fgets(buf, sizeof(buf), stdin);
             int len = strlen(buf);
-            buf[len-1] = '\0'; //* removes '\n'
+            buf[len-1] = '\0'; // removes '\n'
             memset(wifi_config.sta.ssid, 0, sizeof(wifi_config.sta.ssid));
 
             char *rest = NULL;
