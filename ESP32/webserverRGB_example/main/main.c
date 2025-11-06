@@ -62,6 +62,7 @@ static SemaphoreHandle_t s_semph_get_ip_addrs = NULL;
 #endif
 
 #if CONFIG_EXAMPLE_CONNECT_IPV6
+#define MAX_IP6_ADDRS_PER_NETIF (5)
 static SemaphoreHandle_t s_semph_get_ip6_addrs = NULL;
 /* types of ipv6 addresses to be displayed on ipv6 events */
 const char *example_ipv6_addr_types_to_str[6] = {
