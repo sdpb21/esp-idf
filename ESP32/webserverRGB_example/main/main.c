@@ -29,6 +29,13 @@ static const char *TAG = "main";
 static int s_retry_num = 0;
 static SemaphoreHandle_t s_semph_get_ip_addrs = NULL;
 
+#if CONFIG_EXAMPLE_WIFI_SCAN_METHOD_FAST
+#define EXAMPLE_WIFI_SCAN_METHOD WIFI_FAST_SCAN
+#elif CONFIG_EXAMPLE_WIFI_SCAN_METHOD_ALL_CHANNEL
+#define EXAMPLE_WIFI_SCAN_METHOD WIFI_ALL_CHANNEL_SCAN
+#endif
+
+
 #if CONFIG_EXAMPLE_CONNECT_IPV6
 static SemaphoreHandle_t s_semph_get_ip6_addrs = NULL;
 /* types of ipv6 addresses to be displayed on ipv6 events */
@@ -51,7 +58,7 @@ const char *example_ipv6_addr_types_to_str[6] = {
 #define EXAMPLE_CONNECT_PREFERRED_IPV6_TYPE ESP_IP6_ADDR_IS_UNIQUE_LOCAL
 #endif // if-elif CONFIG_EXAMPLE_CONNECT_IPV6_PREF_...
 
-#endif
+#endif  // #if CONFIG_EXAMPLE_CONNECT_IPV6
 
 esp_err_t init_led(void);
 esp_err_t toggle_led(int led);
