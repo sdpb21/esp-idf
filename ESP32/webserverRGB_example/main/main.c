@@ -282,32 +282,32 @@ esp_err_t toggle_led(int led)
 
 static void rgb_example_wifi_start(void)
 {
-    /*/ Initializes the configuration structure parameters with default values to be passed to
-        esp_wifi_init call */
+    /* Initializes the configuration structure parameters with default values to be passed to
+       esp_wifi_init call */
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
-    /** Initializes the Wifi, allocates resources for wifi drivers such as wifi control structure,
-     *  RX/TX buffer, wifi NVS structure, etc. Also starts wifi task. This API must be called 
+    /** Initializes the WiFi, allocates resources for WiFi drivers such as WiFi control structure,
+     *  RX/TX buffer, WiFi NVS structure, etc. Also starts WiFi task. This API must be called
      *  before all other WiFi APIs must be called. You must always use WIFI_INIT_CONFIG_DEFAULT to
-     *  set the configuration default values, this guarantee that all the fields get the right
+     *  set the configuration default values, this guarantees that all the fields get the right
      *  value when more fields are added to wifi_init_config_t structure in a future release. If
-     *  you want to set your own initial values, overwrite the default values which are set by
+     *  you want to set your own initial values, overwrite the default values which are setted by
      *  WIFI_INIT_CONFIG_DEFAULT. Please be notified that the field 'magic' of wifi_init_config_t
      *  should always be WIFI_INIT_CONFIG_MAGIC! (THIS IS WEIRD, DIG INTO THIS IN THE FUTURE),
      *  and check for errors */
     ESP_ERROR_CHECK(esp_wifi_init(&cfg));
 
-    /*/ Define an ESP-netif (NETwork InterFace) inherent config struct and initializes it with
-         default parameters */
+    /* Define an ESP-netif (NETwork InterFace) inherent config struct and initializes it with
+       default parameters */
     esp_netif_inherent_config_t esp_netif_config = ESP_NETIF_INHERENT_DEFAULT_WIFI_STA();
-    /*/ Warning: the interface desc is used in tests to capture actual connection details (IP, gw,
-         mask) */
+    /* Warning: the interface desc is used in tests to capture actual connection details (IP, gw,
+       mask) */
     // Change the interface description initialized with ESP_NETIF_INHERENT_DEFAULT_WIFI_STA
     esp_netif_config.if_desc = EXAMPLE_NETIF_DESC_STA;
-    /*/ Change the priority of the interface from it's default value setted with ESP_NETIF_INHERENT
-        _DEFAULT_WIFI_STA to 128, the higher the value, the higher the priority */
+    /* Change the priority of the interface from it's default value setted with ESP_NETIF_INHERENT
+       _DEFAULT_WIFI_STA to 128, the higher the value, the higher the priority */
     esp_netif_config.route_prio = 128;
-    /*/ Creates esp_netif WiFi object of STATION type, based on the custom configuration and 
-        returns a pointer to the esp_netif instance */
+    /* Creates esp_netif WiFi object of STATION type, based on the custom configuration and 
+       returns a pointer to the esp_netif instance */
     s_example_sta_netif = esp_netif_create_wifi(WIFI_IF_STA, &esp_netif_config);
     // Set default handlers for station
     esp_wifi_set_default_wifi_sta_handlers();
@@ -316,8 +316,8 @@ static void rgb_example_wifi_start(void)
     ESP_ERROR_CHECK(esp_wifi_set_storage(WIFI_STORAGE_RAM));
     // Set the WiFi operating mode as station mode
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
-    /*/ Starts WiFi according to current configuration, creates a station control block and starts
-        the station because the mode is station */
+    /* Starts WiFi according to current configuration, creates a station control block and starts
+       the station because the mode is station */
     ESP_ERROR_CHECK(esp_wifi_start());
 }
 
@@ -434,6 +434,7 @@ static void rgb_example_handler_on_sta_got_ipv6(void *arg, esp_event_base_t even
 static esp_err_t rgb_example_wifi_sta_do_connect(wifi_config_t wifi_config, bool wait)
 {
     if (wait) {
+        // This time the binary semaphore is for take the IP as shared resourse
         s_semph_get_ip_addrs = xSemaphoreCreateBinary();    // Creates a binary semaphore handle
         if (s_semph_get_ip_addrs == NULL) {
             return ESP_ERR_NO_MEM;
@@ -481,8 +482,9 @@ static esp_err_t rgb_example_wifi_sta_do_connect(wifi_config_t wifi_config, bool
     if (wait) {
         ESP_LOGI(TAG, "Waiting for IP(s)");
 #if CONFIG_EXAMPLE_CONNECT_IPV4
-        /* Takes the semaphore token for the IPv4 if it's given, if not, waits a quantity of time
-           given in ticks by portMAX_DELAY, for the token to be given */
+        /* Takes the semaphore token for the IPv4 if it's given (the shared resourse is the IP),
+           if not, waits a quantity of time given in ticks by portMAX_DELAY, for the token to be
+           given */
         xSemaphoreTake(s_semph_get_ip_addrs, portMAX_DELAY);
 #endif
 #if CONFIG_EXAMPLE_CONNECT_IPV6
@@ -650,45 +652,45 @@ static esp_err_t rgb_example_wifi_sta_do_disconnect(void)
 
 void app_main(void)
 {
-    /*/ Step 1: Configures the GPIO for LED outputs and check for errors, terminates the program 
-        if returned code is not ESP_OK */
+    /* Step 1: Configures the GPIO for LED outputs and check for errors, terminates the program 
+       if returned code is not ESP_OK */
     ESP_ERROR_CHECK(init_led());
 
     // Step 2: Declare an HTTP Server instance handle as NULL
     static httpd_handle_t server = NULL;
 
-    /*/ Step 3: Initialize the default NVS partition (this is for storing the wifi credentials in
-        flash) and check for errors, terminates the program if returned code is not ESP_OK */
+    /* Step 3: Initialize the default NVS partition (this is for storing the wifi credentials in
+       flash) and check for errors, terminates the program if returned code is not ESP_OK */
     ESP_ERROR_CHECK(nvs_flash_init());
 
     /* Step 4: Initialize the underlying TCP/IP stack and check for errors, terminates the program
-        if returned code is not ESP_OK */
+       if returned code is not ESP_OK */
     ESP_ERROR_CHECK(esp_netif_init());
 
     /* Step 5: Creates the default event loop and check for errors, terminates the program if
-        returned code is not ESP_OK */
+       returned code is not ESP_OK */
     ESP_ERROR_CHECK(esp_event_loop_create_default());
 
     /* Step 6: Register an event handler to start server when wifi is connected and check for 
-        errors, terminates the program if returned code is not ESP_OK */
+       errors, terminates the program if returned code is not ESP_OK */
     ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &connect_handler, &server));
 
     /* Step 7: Register an event handler to stop the server when wifi is disconnected and check
-        for errors, terminates the program if returned code is not ESP_OK */
+       for errors, terminates the program if returned code is not ESP_OK */
     ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, WIFI_EVENT_STA_DISCONNECTED, &disconnect_handler, &server));
 
     /* Step 8: Configure Wi-Fi or Ethernet, connect, wait for IP and check for errors, terminates
-        the program if returned code is not ESP_OK.
+       the program if returned code is not ESP_OK.
         
-        This all-in-one helper function is used in protocols examples to
-        reduce the amount of boilerplate in the example.
+       This all-in-one helper function is used in protocols examples to
+       reduce the amount of boilerplate in the example.
         
-        It is not intended to be used in real world applications.
-        See examples under examples/wifi/getting_started/ and examples/ethernet/
-        for more complete Wi-Fi or Ethernet initialization code.
+       It is not intended to be used in real world applications.
+       See examples under examples/wifi/getting_started/ and examples/ethernet/
+       for more complete Wi-Fi or Ethernet initialization code.
         
-        Read "Establishing Wi-Fi or Ethernet Connection" section in
-        examples/protocols/README.md for more information about this function. */
+       Read "Establishing Wi-Fi or Ethernet Connection" section in
+       examples/protocols/README.md for more information about this function. */
     ESP_ERROR_CHECK(rgb_example_connect()); // defined
 
 }
