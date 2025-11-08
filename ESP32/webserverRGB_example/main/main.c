@@ -520,7 +520,7 @@ static esp_err_t rgb_example_wifi_connect(void)
     };
 
     /* Configures the ESP32 as station and try to connect it to the access point previously
-       configured, returns ESP_OK if connection was successful */
+       configured, returns ESP_OK if connection was successful and the station got the IP */
     return rgb_example_wifi_sta_do_connect(wifi_config, true);  // defined
 
 }
@@ -537,7 +537,7 @@ static void rgb_example_wifi_stop(void)
     ESP_ERROR_CHECK(err);
     // Free all resources allocated in esp_wifi_init and stop WiFi task and check for errors
     ESP_ERROR_CHECK(esp_wifi_deinit());
-    /* Clears default wifi event handlers for supplied network interface (NETIF) and check for
+    /* Clears default WiFi event handlers for supplied network interface (NETIF) and check for
        errors, stops the program if not ESP_OK */
     ESP_ERROR_CHECK(esp_wifi_clear_default_wifi_driver_and_handlers(s_example_sta_netif));
     // Destroys the esp_netif object
@@ -552,7 +552,7 @@ void rgb_example_wifi_shutdown(void)
        and disconnects the WiFi station from the access point */
     rgb_example_wifi_sta_do_disconnect();   // defined
     /* Stops the WiFi station and frees the station control block, frees all resources allocated
-       in esp_wifi_init and stops WiFi task, clears default wifi event handlers for supplied
+       in esp_wifi_init and stops WiFi task, clears default WiFi event handlers for supplied
        network interface (NETIF) and destroys the esp_netif object */
     rgb_example_wifi_stop();                // defined
 }
@@ -596,7 +596,8 @@ static esp_err_t print_all_ips_tcpip(void* ctx)
 
 static void rgb_example_print_all_netif_ips(const char *prefix)
 {
-    // Print all IPs in TCPIP context to avoid potential races of removing/adding netifs when iterating over the list
+    /* Print all IPs in TCPIP context to avoid potential races of removing/adding netifs when
+       iterating over the list */
     esp_netif_tcpip_exec(print_all_ips_tcpip, (void*) prefix);
 }
 
