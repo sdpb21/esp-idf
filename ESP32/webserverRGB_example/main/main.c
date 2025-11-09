@@ -94,24 +94,24 @@ static esp_err_t rgb_example_wifi_sta_do_disconnect(void);
 // Handler function registered in URI structure, to be called with a supported request method
 static esp_err_t root_get_handler(httpd_req_t *req)
 {
-    /*/ The next 2 lines are useful in case you wish to make a file with binary or text data to be
-        available to your component and you don't want to reformat the file as a C source, in our
-        case we want to embed the html code stored in the view.html file, we must first specify the
-        argument EMBED_TXTFILES in the component registration (CMakeLists.txt file) as follows:
+    /* The next 2 lines are useful in case you wish to make a file with binary or text data to be
+       available to your component and you don't want to reformat the file as a C source, in our
+       case we want to embed the html code stored in the view.html file, we must first specify the
+       argument EMBED_TXTFILES in the component registration (CMakeLists.txt file) as follows:
         
-        idf_component_register(...
-                    EMBED_TXTFILES "view.html")
+       idf_component_register(...
+                   EMBED_TXTFILES "view.html")
         
-        This will embed the contents of the text file wiew.html as a null-terminated string. The
-        file contents will be added to the .rodata section in flash memory, and are available via
-        symbol names as can be read in the next 2 lines:*/
+       This will embed the contents of the text file wiew.html as a null-terminated string. The
+       file contents will be added to the .rodata section in flash memory, and are available via
+       symbol names as can be read in the next 2 lines: */
     extern unsigned char view_start[] asm("_binary_view_html_start");
     extern unsigned char view_end[] asm("_binary_view_html_end");
     // Get the lenght of the html file stored as a string
     size_t view_len = view_end - view_start;
     char viewHtml[view_len];                // Creates a string with the lenght of the html file
-    /*/ Next line copy view_len bytes starting from address pointed by view_start to address 
-        pointed by viewHtml */
+    /* Next line copy view_len bytes starting from address pointed by view_start to address 
+       pointed by viewHtml */
     memcpy(viewHtml, view_start, view_len);
     ESP_LOGI(TAG, "URI: %s", req->uri);
 
@@ -132,20 +132,21 @@ static esp_err_t root_get_handler(httpd_req_t *req)
     }
 
     char *viewHtmlUpdated;  // Pointer to a char
-    /*/ Allocates a storage large enough to hold the output (viewHtml) including the terminated 
-        null character, returns a pointer to that storage via the first argument (viewHtmlUpdated),
-        the pointer should be passed to free to release the allocated storage when it's no longer
-        needed. Returns the number of characters written */
+    /* Allocates a storage large enough to hold the output (viewHtml) including the terminated 
+       null character, returns a pointer to that storage via the first argument (viewHtmlUpdated),
+       the pointer should be passed to free to release the allocated storage when it's no longer
+       needed. Returns the number of characters written */
     int formattedStrResult = asprintf(&viewHtmlUpdated, viewHtml, led_r_state ? "ON" : "OFF", led_g_state ? "ON" : "OFF", led_b_state ? "ON" : "OFF");
 
-    /*/ Next line sets the 'Content type' field of the HTTP response to text/html, but it isn't 
-        sent out until any of the send APIs is executed */
+    /* Next line sets the 'Content type' field of the HTTP response to text/html, but it isn't 
+       sent out until any of the send APIs is executed */
     httpd_resp_set_type(req, "text/html");
 
     // If the number of characters returned by asprintf is greater than 0, then...
     if (formattedStrResult > 0)
     {
-        // Send a complete HTML response, assumes that the entire response is in a buffer (viewHtmlUpdated)
+        /* Send a complete HTML response, assumes that the entire response is in a buffer
+           (viewHtmlUpdated) */
         httpd_resp_send(req, viewHtmlUpdated, view_len);
         free(viewHtmlUpdated);
     }
@@ -154,7 +155,6 @@ static esp_err_t root_get_handler(httpd_req_t *req)
         ESP_LOGE(TAG, "Error updating variables");
         httpd_resp_send(req, viewHtml, view_len);
     }
-
 
     return ESP_OK;
 }
@@ -166,7 +166,6 @@ static const httpd_uri_t root = {
     .handler = root_get_handler // Handler to call for supported request method
 };
 
-
 static httpd_handle_t start_webserver(void)
 {
     httpd_handle_t server = NULL;
@@ -177,8 +176,8 @@ static httpd_handle_t start_webserver(void)
 
     // Define and initialize an HTTPS server config struct, with default values
     httpd_ssl_config_t conf = HTTPD_SSL_CONFIG_DEFAULT();
-    /*/ Transport mode insecure (SSL disabled) to start the server without SSL, this is used for
-        testing or to use it in trusted environments where you prefer speed over security */
+    /* Transport mode insecure (SSL disabled) to start the server without SSL, this is used for
+       testing or to use it in trusted environments where you prefer speed over security */
     conf.transport_mode = HTTPD_SSL_TRANSPORT_INSECURE;
     // Creates a SSL (Secure Sockets Layer) capable HTTP server (SSL is diabled this time)
     esp_err_t ret = httpd_ssl_start(&server, &conf);
@@ -189,14 +188,12 @@ static httpd_handle_t start_webserver(void)
         return NULL;
     }
 
-
     // Set URI handlers
     ESP_LOGI(TAG, "Registering URI handlers");
     // Registers an URI (Uniform Resource Identifier) handler
     httpd_register_uri_handler(server, &root);
     return server;
 }
-
 
 static void stop_webserver(httpd_handle_t server)
 {
@@ -672,11 +669,11 @@ void app_main(void)
        returned code is not ESP_OK */
     ESP_ERROR_CHECK(esp_event_loop_create_default());
 
-    /* Step 6: Register an event handler to start server when wifi is connected and check for 
+    /* Step 6: Register an event handler to start server when WiFi is connected and check for 
        errors, terminates the program if returned code is not ESP_OK */
     ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &connect_handler, &server));
 
-    /* Step 7: Register an event handler to stop the server when wifi is disconnected and check
+    /* Step 7: Register an event handler to stop the server when WiFi is disconnected and check
        for errors, terminates the program if returned code is not ESP_OK */
     ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, WIFI_EVENT_STA_DISCONNECTED, &disconnect_handler, &server));
 
