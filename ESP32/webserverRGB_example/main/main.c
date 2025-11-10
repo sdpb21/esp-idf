@@ -94,6 +94,7 @@ static esp_err_t rgb_example_wifi_sta_do_disconnect(void);
 // Handler function registered in URI structure, to be called with a supported request method
 static esp_err_t root_get_handler(httpd_req_t *req)
 {
+    ESP_LOGE(TAG, "inside root_get_handler");
     /* The next 2 lines are useful in case you wish to make a file with binary or text data to be
        available to your component and you don't want to reformat the file as a C source, in our
        case we want to embed the html code stored in the view.html file, we must first specify the
@@ -169,7 +170,7 @@ static const httpd_uri_t root = {
 static httpd_handle_t start_webserver(void)
 {
     httpd_handle_t server = NULL;
-
+    ESP_LOGE(TAG, "inside start_webserver");
 
     // Start the httpd server
     ESP_LOGI(TAG, "Starting server");
@@ -197,6 +198,7 @@ static httpd_handle_t start_webserver(void)
 
 static void stop_webserver(httpd_handle_t server)
 {
+    ESP_LOGE(TAG, "inside stop_webserver");
     // Stop the httpd server
     httpd_ssl_stop(server);
 }
@@ -206,6 +208,7 @@ static void disconnect_handler(void *arg, esp_event_base_t event_base,
                                int32_t event_id, void *event_data)
 {
     httpd_handle_t *server = (httpd_handle_t *)arg;
+    ESP_LOGE(TAG, "inside disconnect_handler");
     if (*server)
     {
         stop_webserver(*server);
@@ -218,6 +221,7 @@ static void connect_handler(void *arg, esp_event_base_t event_base,
                             int32_t event_id, void *event_data)
 {
     httpd_handle_t *server = (httpd_handle_t *)arg;
+    ESP_LOGE(TAG, "inside connect_handler");
     if (*server == NULL)
     {
         *server = start_webserver();
@@ -227,6 +231,7 @@ static void connect_handler(void *arg, esp_event_base_t event_base,
 
 esp_err_t init_led(void)
 {
+    ESP_LOGE(TAG, "inside init_led");
     gpio_config_t pGPIOConfig;                          // Declares the struct to config the GPIO
     pGPIOConfig.pin_bit_mask = (1ULL << ledR)           // Set pins to be used
                              | (1ULL << ledG) 
@@ -247,6 +252,7 @@ esp_err_t init_led(void)
 // Function to turn on and off LEDs
 esp_err_t toggle_led(int led)
 {
+    ESP_LOGE(TAG, "inside toggle_led");
     int8_t state = 0;
     switch (led)
     {
@@ -279,6 +285,7 @@ esp_err_t toggle_led(int led)
 
 static void rgb_example_wifi_start(void)
 {
+    ESP_LOGE(TAG, "inside rgb_example_wifi_start");
     /* Initializes the configuration structure parameters with default values to be passed to
        esp_wifi_init call */
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
@@ -321,6 +328,7 @@ static void rgb_example_wifi_start(void)
 static void rgb_example_handler_on_wifi_disconnect(void *arg, esp_event_base_t event_base,
                                int32_t event_id, void *event_data)
 {
+    ESP_LOGE(TAG, "inside rgb_example_handler_on_wifi_disconnect");
     s_retry_num++;
     /* The next if block is executed when the actual number of connection retries is bigger than
        the default maximum number of retries, it gives the binary semaphore and unregisters the
@@ -370,12 +378,14 @@ static void rgb_example_handler_on_wifi_disconnect(void *arg, esp_event_base_t e
  */
 bool rgb_example_is_our_netif(const char *prefix, esp_netif_t *netif)
 {
+    ESP_LOGE(TAG, "inside rgb_example_is_our_netif");
     return strncmp(prefix, esp_netif_get_desc(netif), strlen(prefix) - 1) == 0;
 }
 
 static void rgb_example_handler_on_sta_got_ip(void *arg, esp_event_base_t event_base,
                       int32_t event_id, void *event_data)
 {
+    ESP_LOGE(TAG, "inside rgb_example_handler_on_sta_got_ip");
     s_retry_num = 0;
     ip_event_got_ip_t *event = (ip_event_got_ip_t *)event_data;
     /* Next if block returns if the string stored in EXAMPLE_NETIF_DESC_STA is the same as the
@@ -397,6 +407,7 @@ static void rgb_example_handler_on_sta_got_ip(void *arg, esp_event_base_t event_
 static void rgb_example_handler_on_wifi_connect(void *esp_netif, esp_event_base_t event_base,
                             int32_t event_id, void *event_data)
 {
+    ESP_LOGE(TAG, "inside rgb_example_handler_on_wifi_connect");
 #if CONFIG_EXAMPLE_CONNECT_IPV6
     /* Creates interface link-local IPv6 address. Causes the TCP/IP stack to create a link-local
        IPv6 address for the specified interface */
@@ -407,6 +418,7 @@ static void rgb_example_handler_on_wifi_connect(void *esp_netif, esp_event_base_
 static void rgb_example_handler_on_sta_got_ipv6(void *arg, esp_event_base_t event_base,
                         int32_t event_id, void *event_data)
 {
+    ESP_LOGE(TAG, "inside rgb_example_handler_on_sta_got_ipv6");
     ip_event_got_ip6_t *event = (ip_event_got_ip6_t *)event_data;
     /* Next if block returns if the string stored in EXAMPLE_NETIF_DESC_STA is the same as the
        stored in the network interface description from the event structure */
@@ -430,6 +442,7 @@ static void rgb_example_handler_on_sta_got_ipv6(void *arg, esp_event_base_t even
 
 static esp_err_t rgb_example_wifi_sta_do_connect(wifi_config_t wifi_config, bool wait)
 {
+    ESP_LOGE(TAG, "inside rgb_example_wifi_sta_do_connect");
     if (wait) {
         // This time the binary semaphore is for take the IP as shared resourse
         s_semph_get_ip_addrs = xSemaphoreCreateBinary();    // Creates a binary semaphore handle
@@ -499,6 +512,7 @@ static esp_err_t rgb_example_wifi_sta_do_connect(wifi_config_t wifi_config, bool
 
 static esp_err_t rgb_example_wifi_connect(void)
 {
+    ESP_LOGE(TAG, "inside rgb_example_wifi_connect");
     ESP_LOGI(TAG, "Start example_connect.");
     // Executes the first steps to start a WiFi connection according to documentation
     rgb_example_wifi_start();           // defined
@@ -524,6 +538,7 @@ static esp_err_t rgb_example_wifi_connect(void)
 
 static void rgb_example_wifi_stop(void)
 {
+    ESP_LOGE(TAG, "inside rgb_example_wifi_stop");
     /* Stops the WiFi station and frees the station control block */
     esp_err_t err = esp_wifi_stop();
     // if esp_wifi_init function wasn't executed yet, then returns
@@ -543,8 +558,9 @@ static void rgb_example_wifi_stop(void)
     s_example_sta_netif = NULL;
 }
 
-void rgb_example_wifi_shutdown(void)
+static void rgb_example_wifi_shutdown(void)
 {
+    ESP_LOGE(TAG, "inside rgb_example_wifi_shutdown");
     /* Unregisters the handler functions previously registered, deletes the binary semaphore
        and disconnects the WiFi station from the access point */
     rgb_example_wifi_sta_do_disconnect();   // defined
@@ -559,13 +575,15 @@ void rgb_example_wifi_shutdown(void)
  * All netifs created within common connect component are prefixed with the module TAG,
  * so it returns true if the specified netif is owned by this module
  */
-bool example_is_our_netif(const char *prefix, esp_netif_t *netif)
+static bool example_is_our_netif(const char *prefix, esp_netif_t *netif)
 {
+    ESP_LOGE(TAG, "inside example_is_our_netif");
     return strncmp(prefix, esp_netif_get_desc(netif), strlen(prefix) - 1) == 0;
 }
 
 static esp_err_t print_all_ips_tcpip(void* ctx)
 {
+    ESP_LOGE(TAG, "inside print_all_ips_tcpip");
     const char *prefix = ctx;
     // iterate over active interfaces, and print out IPs of "our" netifs
     esp_netif_t *netif = NULL;
@@ -593,6 +611,7 @@ static esp_err_t print_all_ips_tcpip(void* ctx)
 
 static void rgb_example_print_all_netif_ips(const char *prefix)
 {
+    ESP_LOGE(TAG, "inside rgb_example_print_all_netif_ips");
     /* Print all IPs in TCPIP context to avoid potential races of removing/adding netifs when
        iterating over the list */
     esp_netif_tcpip_exec(print_all_ips_tcpip, (void*) prefix);
@@ -600,6 +619,7 @@ static void rgb_example_print_all_netif_ips(const char *prefix)
 
 static esp_err_t rgb_example_connect(void)
 {
+    ESP_LOGE(TAG, "inside rgb_example_connect");
 #if CONFIG_EXAMPLE_CONNECT_WIFI
     /* rgb_example_wifi_connect starts the WiFi connection, configures the ESP32 as station and
        try to connect it to the access point, returns ESP_OK if everything is ok */
@@ -620,6 +640,7 @@ static esp_err_t rgb_example_connect(void)
 
 static esp_err_t rgb_example_wifi_sta_do_disconnect(void)
 {
+    ESP_LOGE(TAG, "inside rgb_example_wifi_sta_do_disconnect");
     /* Unregisters the handler function rgb_example_handler_on_wifi_disconnect previously
        registered in rgb_example_wifi_sta_do_connect function, after that, check for errors */
     ESP_ERROR_CHECK(esp_event_handler_unregister(WIFI_EVENT, WIFI_EVENT_STA_DISCONNECTED, &rgb_example_handler_on_wifi_disconnect));
@@ -650,6 +671,7 @@ static esp_err_t rgb_example_wifi_sta_do_disconnect(void)
 
 void app_main(void)
 {
+    ESP_LOGE(TAG, "inside app_main");
     /* Step 1: Configures the GPIO for LED outputs and check for errors, terminates the program 
        if returned code is not ESP_OK */
     ESP_ERROR_CHECK(init_led());
