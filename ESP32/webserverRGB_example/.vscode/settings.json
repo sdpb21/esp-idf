@@ -33,7 +33,15 @@
         "climits": "c",
         "compare": "cpp",
         "cstdint": "cpp",
-        "format": "cpp"
+        "format": "cpp",
+        "esp_event.h": "c",
+        "esp_system.h": "c",
+        "param.h": "c",
+        "nvs_flash.h": "c",
+        "esp_log.h": "c",
+        "esp_netif.h": "c",
+        "esp_wifi.h": "c",
+        "esp_https_server.h": "c"
     },
     "idf.notificationSilentMode": false,
     "idf.port": "/dev/ttyUSB0",
