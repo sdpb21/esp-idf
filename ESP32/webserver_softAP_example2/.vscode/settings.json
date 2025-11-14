@@ -11,5 +11,6 @@
         "board/esp32-wrover-kit-3.3v.cfg"
     ],
     "idf.pythonBinPath": "/home/zxcv/.espressif/python_env/idf5.4_py3.8_env/bin/python",
-    "idf.toolsPath": "/home/zxcv/.espressif"
+    "idf.toolsPath": "/home/zxcv/.espressif",
+    "idf.notificationSilentMode": false
 }
