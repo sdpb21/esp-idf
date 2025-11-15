@@ -1,3 +1,7 @@
+/* Conclusion: is better to use this code starting from the softAP example than the HTTP simple
+   server example because the first includes a file where the SSID, password, channel and 
+   maximum number of connected stations can be defined instead of typing them here */
+
 /*  WiFi softAP Example
 
    This example code is in the Public Domain (or CC0 licensed, at your option.)
