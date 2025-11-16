@@ -233,7 +233,7 @@ static void connect_handler(void* arg, esp_event_base_t event_base,
 
 /******************* WEBSERVER CODE ENDS ************************/
 
-static void configure_led (void)
+static void configure_led(void)
 {
 	gpio_reset_pin (LED);
 
@@ -310,7 +310,8 @@ void app_main(void)
 	// HTTP server instance handler (a void pointer)
     static httpd_handle_t server = NULL;
 
-	configure_led ();
+	// Calls a function to configure the GPIO pin for the LED
+    configure_led();
     //Initialize NVS
     esp_err_t ret = nvs_flash_init();
     if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
