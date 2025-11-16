@@ -307,7 +307,8 @@ void wifi_init_softap(void)
 void app_main(void)
 {
 
-	static httpd_handle_t server = NULL;
+	// HTTP server instance handler (a void pointer)
+    static httpd_handle_t server = NULL;
 
 	configure_led ();
     //Initialize NVS
