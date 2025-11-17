@@ -392,7 +392,7 @@ static void rgb_example_handler_on_sta_got_ip(void *arg, esp_event_base_t event_
        the IP address given by the IP2STR macro, the IP is stored in a utint32_t type number in
        different bytes and the macro returns those bytes separated */
     ESP_LOGI(TAG, "Got IPv4 event: Interface \"%s\" address: " IPSTR, esp_netif_get_desc(event->esp_netif), IP2STR(&event->ip_info.ip));
-    if (s_semph_get_ip_addrs) { // if semaphore is taken, give it
+    if (s_semph_get_ip_addrs) { // if semaphore is created or taken (not NULL), give it
         xSemaphoreGive(s_semph_get_ip_addrs);
     } else {
         ESP_LOGI(TAG, "- IPv4 address: " IPSTR ",", IP2STR(&event->ip_info.ip));
