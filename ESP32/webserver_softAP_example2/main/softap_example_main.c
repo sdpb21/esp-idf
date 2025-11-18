@@ -272,6 +272,11 @@ void wifi_init_softap(void)
     /* Initialize the underlying TCP/IP stack and check for errors, stops the program if returned
        value is no ESP_OK */
     ESP_ERROR_CHECK(esp_netif_init());
+    /* Creates a default event loop. Loop library allows components to declare events so that
+       other components can register handlers (functions that executes when those events happens).
+       An event indicates an important occurrance such as a WiFi successful connection to an
+       access point. The event loop is the bridge between events and event handlers. The default
+       event loop is a special type of loop used for system events such as WiFi events. */
     ESP_ERROR_CHECK(esp_event_loop_create_default());
     esp_netif_create_default_wifi_ap();
 
