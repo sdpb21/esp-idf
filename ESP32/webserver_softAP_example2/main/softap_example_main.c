@@ -278,6 +278,10 @@ void wifi_init_softap(void)
        access point. The event loop is the bridge between events and event handlers. The default
        event loop is a special type of loop used for system events such as WiFi events. */
     ESP_ERROR_CHECK(esp_event_loop_create_default());
+    /* This API creates an esp_netif object with the default WiFi access point configuration,
+       attaches the netif object to WiFi access point and registers WiFi AP event handlers to the
+       default event loop. This API uses assert() to check for potential errors, so it could abbort
+       the program (Note that the default event loop needs to be created prior to calling this API) */
     esp_netif_create_default_wifi_ap();
 
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
