@@ -284,6 +284,9 @@ void wifi_init_softap(void)
        the program (Note that the default event loop needs to be created prior to calling this API) */
     esp_netif_create_default_wifi_ap();
 
+    /* Declares the WiFi stack configuration parameters structure and initializes it with default
+       values via WIFI_INIT_CONFIG_DEFAULT macro as a step to be passed to the esp_wifi_init
+       function call */
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
     ESP_ERROR_CHECK(esp_wifi_init(&cfg));
 
