@@ -288,6 +288,15 @@ void wifi_init_softap(void)
        values via WIFI_INIT_CONFIG_DEFAULT macro as a step to be passed to the esp_wifi_init
        function call */
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+    /* Initializes the WiFi, allocates resources for WiFi drivers such as WiFi control structure,
+       RX/TX buffer, WiFi NVS structure, etc. Also starts WiFi task. This API must be called
+       before all other WiFi APIs must be called. You must always use WIFI_INIT_CONFIG_DEFAULT to
+       set the configuration default values, this guarantees that all the fields get the right
+       value when more fields are added to wifi_init_config_t structure in a future release. If
+       you want to set your own initial values, overwrite the default values which are setted by
+       WIFI_INIT_CONFIG_DEFAULT. Please be notified that the field 'magic' of wifi_init_config_t
+       should always be WIFI_INIT_CONFIG_MAGIC! (THIS IS WEIRD, DIG INTO THIS IN THE FUTURE),
+       and check for errors */
     ESP_ERROR_CHECK(esp_wifi_init(&cfg));
 
     ESP_ERROR_CHECK(esp_event_handler_instance_register(WIFI_EVENT,
