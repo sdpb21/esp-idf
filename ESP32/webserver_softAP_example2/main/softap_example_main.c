@@ -299,6 +299,10 @@ void wifi_init_softap(void)
        and check for errors */
     ESP_ERROR_CHECK(esp_wifi_init(&cfg));
 
+    /* Registers an instance of the WiFi event handler (wifi_event_handler) to the default loop,
+       when any WiFi event happens, the wifi_event_handler handler function is called. Calling 
+       this function with instance (last argument) set to NULL is equivalent to calling 
+       esp_event_handler_register. So, in the next line, we have that case. */
     ESP_ERROR_CHECK(esp_event_handler_instance_register(WIFI_EVENT,
                                                         ESP_EVENT_ANY_ID,
                                                         &wifi_event_handler,
