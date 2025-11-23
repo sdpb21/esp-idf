@@ -309,13 +309,14 @@ void wifi_init_softap(void)
                                                         NULL,
                                                         NULL));
 
+    /* Soft-AP configuration settings for the device. */
     wifi_config_t wifi_config = {
         .ap = {
             .ssid = EXAMPLE_ESP_WIFI_SSID,
             .ssid_len = strlen(EXAMPLE_ESP_WIFI_SSID),
             .channel = EXAMPLE_ESP_WIFI_CHANNEL,
             .password = EXAMPLE_ESP_WIFI_PASS,
-            .max_connection = EXAMPLE_MAX_STA_CONN,
+            .max_connection = EXAMPLE_MAX_STA_CONN, // Maximum stations number allowed to connect in.
             .authmode = WIFI_AUTH_WPA_WPA2_PSK
         },
     };
