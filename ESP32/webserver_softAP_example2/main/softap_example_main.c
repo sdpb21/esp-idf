@@ -320,6 +320,7 @@ void wifi_init_softap(void)
             .authmode = WIFI_AUTH_WPA_WPA2_PSK
         },
     };
+    /* If there is no password, configure the access point as open (without password). */
     if (strlen(EXAMPLE_ESP_WIFI_PASS) == 0) {
         wifi_config.ap.authmode = WIFI_AUTH_OPEN;
     }
