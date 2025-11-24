@@ -325,9 +325,11 @@ void wifi_init_softap(void)
         wifi_config.ap.authmode = WIFI_AUTH_OPEN;
     }
 
-    /* Sets the WiFi opetating mode as access point and check for errors, if returned value isn't
+    /* Sets the WiFi operating mode as access point and check for errors, if returned value isn't
        ESP_OK, terminates the program. */
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_AP));
+    /* Sets the configuration of the access point, the configuration will be stored in the NVS for
+       soft-AP, check for errors, if returned value is not ESP_OK, terminates the program */
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_AP, &wifi_config));
     ESP_ERROR_CHECK(esp_wifi_start());
 
