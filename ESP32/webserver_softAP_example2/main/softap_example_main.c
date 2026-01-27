@@ -270,7 +270,7 @@ static void wifi_event_handler(void* arg, esp_event_base_t event_base,
 void wifi_init_softap(void)
 {
     /* Initialize the underlying TCP/IP stack and check for errors, stops the program if returned
-       value is no ESP_OK */
+       value is not ESP_OK */
     ESP_ERROR_CHECK(esp_netif_init());
     /* Creates a default event loop. Loop library allows components to declare events so that
        other components can register handlers (functions that executes when those events happens).
@@ -331,6 +331,8 @@ void wifi_init_softap(void)
     /* Sets the configuration of the access point, the configuration will be stored in the NVS for
        soft-AP, check for errors, if returned value is not ESP_OK, terminates the program */
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_AP, &wifi_config));
+    /* Next line starts the WiFi according to current configuration, if mode is WIFI_MODE_AP, it 
+       creates soft-AP control block and starts soft-AP */
     ESP_ERROR_CHECK(esp_wifi_start());
 
     ESP_LOGI(TAG, "wifi_init_softap finished. SSID:%s password:%s channel:%d",
