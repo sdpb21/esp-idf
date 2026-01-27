@@ -356,6 +356,7 @@ void app_main(void)
     ESP_ERROR_CHECK(ret);
 
     ESP_LOGI(TAG, "ESP_WIFI_MODE_AP");
+    /*  Configures and starts the Soft Access Point */
     wifi_init_softap();
 
     ESP_ERROR_CHECK(esp_netif_init());
