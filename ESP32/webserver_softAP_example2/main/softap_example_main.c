@@ -33,6 +33,7 @@ static const char *TAG = "webserver";
 
 /******************  WEBSEVER CODE BEGINS ***********************/
 
+/* Handler function to turn of the LED */
 static esp_err_t ledOFF_handler(httpd_req_t *req)
 {
 	esp_err_t error;
@@ -53,6 +54,8 @@ static esp_err_t ledOFF_handler(httpd_req_t *req)
     
 }
 
+/* Struct with data to be passed as parameter to the httpd_register_uri_handler function, to 
+   register the URI handler for the function to get the LED turned off. */
 static const httpd_uri_t ledoff = {
     .uri       = "/ledoff",
     .method    = HTTP_GET,
