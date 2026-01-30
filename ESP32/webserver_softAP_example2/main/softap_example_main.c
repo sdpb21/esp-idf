@@ -36,16 +36,21 @@ static const char *TAG = "webserver";
 static esp_err_t ledOFF_handler(httpd_req_t *req)
 {
 	esp_err_t error;
+
 	ESP_LOGI(TAG, "LED Turned OFF");
 	gpio_set_level(LED, 0);
-	const char *response = (const char *) req->user_ctx;
+	
+    const char *response = (const char *) req->user_ctx;
 	error = httpd_resp_send(req, response, strlen(response));
-	if (error != ESP_OK)
+	
+    if (error != ESP_OK)
 	{
 		ESP_LOGI(TAG, "Error %d while sending Response", error);
 	}
 	else ESP_LOGI(TAG, "Response sent Successfully");
-	return error;
+	
+    return error;
+    
 }
 
 static const httpd_uri_t ledoff = {
@@ -186,13 +191,16 @@ esp_err_t http_404_error_handler(httpd_req_t *req, httpd_err_code_t err)
 static httpd_handle_t start_webserver(void)
 {
     httpd_handle_t server = NULL;
+    // Define and initialize an HTTP server config struct, with default values
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
     config.lru_purge_enable = true;
 
     // Start the httpd server
     ESP_LOGI(TAG, "Starting server on port: '%d'", config.server_port);
+    /* Next line starts the webserver. Creates an instance of HTTP server and allocates 
+       memory/resources for it depending upon the specified configuration. */
     if (httpd_start(&server, &config) == ESP_OK) {
-        // Set URI handlers
+        // Set URI (Uniform Resource Identifier) handlers
         ESP_LOGI(TAG, "Registering URI handlers");
         httpd_register_uri_handler(server, &ledoff);
         httpd_register_uri_handler(server, &ledon);
@@ -221,6 +229,7 @@ static void disconnect_handler(void* arg, esp_event_base_t event_base,
     }
 }
 
+// Handler function to start the server when a station connects to the access point
 static void connect_handler(void* arg, esp_event_base_t event_base,
                             int32_t event_id, void* event_data)
 {
@@ -359,8 +368,12 @@ void app_main(void)
     /*  Configures and starts the Soft Access Point */
     wifi_init_softap();
 
+    /* Next line initializes the underlying TCP/IP stack. This function should be called exactly 
+       once from application code, when the application starts up. */
     ESP_ERROR_CHECK(esp_netif_init());
 
+    /* Next line registers the event handler for the moment when a station connects and gets an IP
+       address */
     ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, IP_EVENT_AP_STAIPASSIGNED, &connect_handler, &server));
 //    ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, WIFI_EVENT_STA_DISCONNECTED, &disconnect_handler, &server));
 }
