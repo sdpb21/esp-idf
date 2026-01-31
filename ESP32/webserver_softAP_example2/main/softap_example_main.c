@@ -33,15 +33,17 @@ static const char *TAG = "webserver";
 
 /******************  WEBSEVER CODE BEGINS ***********************/
 
-/* Handler function to turn of the LED */
+/* Handler function to turn off the LED */
 static esp_err_t ledOFF_handler(httpd_req_t *req)
 {
 	esp_err_t error;
 
 	ESP_LOGI(TAG, "LED Turned OFF");
+    /* Next line sets the output level of the LED pin. */
 	gpio_set_level(LED, 0);
 	
     const char *response = (const char *) req->user_ctx;
+    /* Next line sends a complete HTTP response. */
 	error = httpd_resp_send(req, response, strlen(response));
 	
     if (error != ESP_OK)
@@ -93,22 +95,32 @@ static const httpd_uri_t ledoff = {
 </html>"
 };
 
-
+/* Handler function to turn on the LED. */
 static esp_err_t ledON_handler(httpd_req_t *req)
 {
 	esp_err_t error;
+
 	ESP_LOGI(TAG, "LED Turned ON");
+    /* Next line sets the output level of the LED pin to 1 to turn on the LED. */
 	gpio_set_level(LED, 1);
-	const char *response = (const char *) req->user_ctx;
+	
+    const char *response = (const char *) req->user_ctx;
+    /* Next line sends a complete HTTP response to the request with the contents of the buffer
+       pointed by response. */
 	error = httpd_resp_send(req, response, strlen(response));
-	if (error != ESP_OK)
+	
+    if (error != ESP_OK)
 	{
 		ESP_LOGI(TAG, "Error %d while sending Response", error);
 	}
 	else ESP_LOGI(TAG, "Response sent Successfully");
-	return error;
+	
+    return error;
+
 }
 
+/* Struct with data to be passed as parameter to the httpd_register_uri_handler function, to 
+   register the URI handler for the function to get the LED turned on. */
 static const httpd_uri_t ledon = {
     .uri       = "/ledon",
     .method    = HTTP_GET,
@@ -146,6 +158,8 @@ static const httpd_uri_t ledon = {
 </html>"
 };
 
+/* Struct with data to be passed as parameter to the httpd_register_uri_handler function, to 
+   register the URI handler for the root screen of the webserver. */
 static const httpd_uri_t root = {
     .uri       = "/",
     .method    = HTTP_GET,
