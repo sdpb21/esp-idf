@@ -41,7 +41,7 @@ static esp_err_t ledOFF_handler(httpd_req_t *req)
 {
 	esp_err_t error;
 
-	ESP_LOGI(TAG, "LED Turned OFF");
+	ESP_LOGI(TAG, "********* ledOFF_handler starts");
     /* Next line sets the output level of the LED pin. */
 	gpio_set_level(LED, 0);
 	
@@ -103,7 +103,7 @@ static esp_err_t ledON_handler(httpd_req_t *req)
 {
 	esp_err_t error;
 
-	ESP_LOGI(TAG, "LED Turned ON");
+	ESP_LOGI(TAG, "************* ledON_handler starts");
     /* Next line sets the output level of the LED pin to 1 to turn on the LED. */
 	gpio_set_level(LED, 1);
 	
@@ -202,6 +202,7 @@ static const httpd_uri_t root = {
 
 esp_err_t http_404_error_handler(httpd_req_t *req, httpd_err_code_t err)
 {
+    ESP_LOGI(TAG, "************* http_404_error_handler starts");
     /* For any other URI send 404 and close socket */
     httpd_resp_send_err(req, HTTPD_404_NOT_FOUND, "Some 404 error message");
     return ESP_FAIL;
@@ -209,6 +210,7 @@ esp_err_t http_404_error_handler(httpd_req_t *req, httpd_err_code_t err)
 
 static httpd_handle_t start_webserver(void)
 {
+    ESP_LOGI(TAG, "********** start_webserver starts");
     httpd_handle_t server = NULL;
     // Define and initialize an HTTP server config struct, with default values
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
@@ -234,12 +236,14 @@ static httpd_handle_t start_webserver(void)
 static void stop_webserver(httpd_handle_t server)
 {
     // Stop the httpd server
+    ESP_LOGI(TAG, "************ stop_webserver starts");
     httpd_stop(server);
 }
 
 static void disconnect_handler(void* arg, esp_event_base_t event_base,
                                int32_t event_id, void* event_data)
 {
+    ESP_LOGI(TAG, "*************** disconnect_handler starts");
     httpd_handle_t* server = (httpd_handle_t*) arg;
     if (*server) {
         ESP_LOGI(TAG, "Stopping webserver");
@@ -252,6 +256,7 @@ static void disconnect_handler(void* arg, esp_event_base_t event_base,
 static void connect_handler(void* arg, esp_event_base_t event_base,
                             int32_t event_id, void* event_data)
 {
+    ESP_LOGI(TAG, "************** connect_handler starts");
     httpd_handle_t* server = (httpd_handle_t*) arg;
     if (*server == NULL) {
         ESP_LOGI(TAG, "Starting webserver");
@@ -261,7 +266,8 @@ static void connect_handler(void* arg, esp_event_base_t event_base,
 
 static void configure_led(void)
 {
-	gpio_reset_pin (LED);
+	ESP_LOGI(TAG, "************* configure_led started");
+    gpio_reset_pin (LED);
 
 	gpio_set_direction (LED, GPIO_MODE_OUTPUT);
 }
@@ -269,6 +275,7 @@ static void configure_led(void)
 static void wifi_event_handler(void* arg, esp_event_base_t event_base,
                                     int32_t event_id, void* event_data)
 {
+    ESP_LOGI(TAG, "***************** wifi_event_handler starts");
     if (event_id == WIFI_EVENT_AP_STACONNECTED) {
         wifi_event_ap_staconnected_t* event = (wifi_event_ap_staconnected_t*) event_data;
         ESP_LOGI(TAG, "station "MACSTR" join, AID=%d",
@@ -282,6 +289,7 @@ static void wifi_event_handler(void* arg, esp_event_base_t event_base,
 
 void wifi_init_softap(void)
 {
+    ESP_LOGI(TAG, "************ wifi_init_softap starts");
     /* Initialize the underlying TCP/IP stack and check for errors, stops the program if returned
        value is not ESP_OK */
     ESP_ERROR_CHECK(esp_netif_init());
@@ -350,12 +358,14 @@ void wifi_init_softap(void)
 
     ESP_LOGI(TAG, "wifi_init_softap finished. SSID:%s password:%s channel:%d",
              EXAMPLE_ESP_WIFI_SSID, EXAMPLE_ESP_WIFI_PASS, EXAMPLE_ESP_WIFI_CHANNEL);
+    ESP_LOGI(TAG, "************** wifi_init_softap ends");
 }
 
 void app_main(void)
 {
 
-	// HTTP server instance handler (a void pointer)
+	ESP_LOGI(TAG, "********** app_main started");
+    // HTTP server instance handler (a void pointer)
     static httpd_handle_t server = NULL;
 
 	// Calls a function to configure the GPIO pin for the LED
@@ -380,4 +390,5 @@ void app_main(void)
        address */
     ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, IP_EVENT_AP_STAIPASSIGNED, &connect_handler, &server));
 //    ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, WIFI_EVENT_STA_DISCONNECTED, &disconnect_handler, &server));
+    ESP_LOGI(TAG, "************* app_main ends");
 }
