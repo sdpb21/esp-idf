@@ -47,6 +47,11 @@ static const char *TAG = "webserver";
 #define SERVO_TIMEBASE_RESOLUTION_HZ 1000000  // 1MHz, 1us per tick
 #define SERVO_TIMEBASE_PERIOD        20000    // 20000 ticks, 20ms
 
+#define PUSH_SWITCH 70          /* Angle to pass as parameter to example_angle_to_compare function 
+                                   to move the servo to push the interruptor */
+#define RETURN_TO_ZERO_DEG  0   /* Angle to pass as parameter to example_angle_to_compare function 
+                                   to return the servo to the zero degrees position */
+
 /* Handler function to turn off the LED */
 static esp_err_t ledOFF_handler(httpd_req_t *req)
 {
@@ -56,10 +61,10 @@ static esp_err_t ledOFF_handler(httpd_req_t *req)
 
 	/* Set the motor control PWM comparator's compare value to change the PWM frequency and
        the angle with each while loop iteration */
-    ESP_ERROR_CHECK(mcpwm_comparator_set_compare_value(comparator, example_angle_to_compare(angle)));
+    ESP_ERROR_CHECK(mcpwm_comparator_set_compare_value(comparator, example_angle_to_compare(PUSH_SWITCH)));
     //Add delay, since it takes time for servo to rotate, usually 200ms/60degree rotation under 5V power supply
     vTaskDelay(pdMS_TO_TICKS(1500));
-    ESP_ERROR_CHECK(mcpwm_comparator_set_compare_value(comparator, example_angle_to_compare(angle)));
+    ESP_ERROR_CHECK(mcpwm_comparator_set_compare_value(comparator, example_angle_to_compare(RETURN_TO_ZERO_DEG)));
 	
     const char *response = (const char *) req->user_ctx;
     /* Next line sends a complete HTTP response. */
