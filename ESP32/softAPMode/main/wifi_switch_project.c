@@ -26,7 +26,7 @@
 
 static const char *TAG = "webserver";
 
-#define LED GPIO_NUM_2
+//#define LED GPIO_NUM_2
 /* The examples use WiFi configuration that you can set via project configuration menu.
 
    If you'd rather not, just change the below entries to strings with
@@ -47,10 +47,24 @@ static const char *TAG = "webserver";
 #define SERVO_TIMEBASE_RESOLUTION_HZ 1000000  // 1MHz, 1us per tick
 #define SERVO_TIMEBASE_PERIOD        20000    // 20000 ticks, 20ms
 
-#define PUSH_SWITCH 70          /* Angle to pass as parameter to example_angle_to_compare function 
+#define PUSH_SWITCH 71          /* Angle to pass as parameter to example_angle_to_compare function 
                                    to move the servo to push the interruptor */
 #define RETURN_TO_ZERO_DEG  0   /* Angle to pass as parameter to example_angle_to_compare function 
                                    to return the servo to the zero degrees position */
+
+mcpwm_cmpr_handle_t comparator;
+
+/* This function returns the angle in degrees converted to a value proportional to the pulse 
+    width in microseconds starting from SERVO_MIN_PULSEWIDTH_US */
+static inline uint32_t example_angle_to_compare(int angle)
+{
+    return (angle - SERVO_MIN_DEGREE) * (SERVO_MAX_PULSEWIDTH_US - SERVO_MIN_PULSEWIDTH_US) / (SERVO_MAX_DEGREE - SERVO_MIN_DEGREE) + SERVO_MIN_PULSEWIDTH_US;
+}
+/*
+    (angle - SERVO_MIN_DEGREE) * (SERVO_MAX_PULSEWIDTH_US - SERVO_MIN_PULSEWIDTH_US)
+    -------------------------------------------------------------------------------- + SERVO_MIN_PULSEWIDTH_US
+                            (SERVO_MAX_DEGREE - SERVO_MIN_DEGREE)
+*/
 
 /* Handler function to turn off the LED */
 static esp_err_t ledOFF_handler(httpd_req_t *req)
@@ -126,7 +140,7 @@ static esp_err_t ledON_handler(httpd_req_t *req)
 
 	ESP_LOGI(TAG, "************* ledON_handler starts");
     /* Next line sets the output level of the LED pin to 1 to turn on the LED. */
-	gpio_set_level(LED, 1);
+	//gpio_set_level(LED, 1);
 	
     const char *response = (const char *) req->user_ctx;
     /* Next line sends a complete HTTP response to the request with the contents of the buffer
@@ -284,7 +298,7 @@ static void connect_handler(void* arg, esp_event_base_t event_base,
         *server = start_webserver();
     }
 }
-
+/*
 static void configure_led(void)
 {
 	ESP_LOGI(TAG, "************* configure_led started");
@@ -292,7 +306,7 @@ static void configure_led(void)
 
 	gpio_set_direction (LED, GPIO_MODE_OUTPUT);
 }
-
+*/
 static void wifi_event_handler(void* arg, esp_event_base_t event_base,
                                     int32_t event_id, void* event_data)
 {
@@ -382,18 +396,6 @@ void wifi_init_softap(void)
     ESP_LOGI(TAG, "************** wifi_init_softap ends");
 }
 
-/* This function returns the angle in degrees converted to a value proportional to the pulse 
-    width in microseconds starting from SERVO_MIN_PULSEWIDTH_US */
-static inline uint32_t example_angle_to_compare(int angle)
-{
-    return (angle - SERVO_MIN_DEGREE) * (SERVO_MAX_PULSEWIDTH_US - SERVO_MIN_PULSEWIDTH_US) / (SERVO_MAX_DEGREE - SERVO_MIN_DEGREE) + SERVO_MIN_PULSEWIDTH_US;
-}
-/*
-    (angle - SERVO_MIN_DEGREE) * (SERVO_MAX_PULSEWIDTH_US - SERVO_MIN_PULSEWIDTH_US)
-    -------------------------------------------------------------------------------- + SERVO_MIN_PULSEWIDTH_US
-                            (SERVO_MAX_DEGREE - SERVO_MIN_DEGREE)
-*/
-
 void app_main(void)
 {
 
@@ -439,7 +441,7 @@ void app_main(void)
 
     /* Step 8: Define the motor control PWM comparator handle (a pointer to a struct of type
        mcpwm_cmpr_t) and initialize it as NULL */
-    mcpwm_cmpr_handle_t comparator = NULL;
+    comparator = NULL;
 
     /* Step 9: Define the motor control PWM comparator configuration structure */
     mcpwm_comparator_config_t comparator_config = {
@@ -490,7 +492,7 @@ void app_main(void)
     static httpd_handle_t server = NULL;
 
 	// Calls a function to configure the GPIO pin for the LED
-    configure_led();
+    //configure_led();
     //Initialize NVS
     esp_err_t ret = nvs_flash_init();
     if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
