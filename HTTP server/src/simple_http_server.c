@@ -2,26 +2,24 @@
 #include "sys/param.h"
 #include "esp_http_server.h"
 
-#define SSID           "SSID"
-#define PASSWORD       "PASSWORD"
+#define SSID		"SSID"
+#define PASSWORD	"PASSWORD"
 
 /* Our URI handler function to be called during GET / request */
-esp_err_t get_handler(httpd_req_t *req)
-{
-    /* Send a simple response */
-    const char resp[] = "URI GET Response";
-    httpd_resp_send(req, resp, HTTPD_RESP_USE_STRLEN);
-    return ESP_OK;
+esp_err_t get_handler(httpd_req_t *req) {
+	/* Send a simple response */
+	const char resp[] = "URI GET Response";
+	httpd_resp_send(req, resp, HTTPD_RESP_USE_STRLEN);
+	return ESP_OK;
 }
 
 /* Our URI handler function to be called during GET /uri request */
-esp_err_t uri_get_handler(httpd_req_t *req)
-{
-    /* Send a simple response */
-    const char resp[] = "Hello, World !";
+esp_err_t uri_get_handler(httpd_req_t *req) {
+	/* Send a simple response */
+	const char resp[] = "Hello, World !";
 	printf("A HTTP client has access /uri\n");
-    httpd_resp_send(req, resp, HTTPD_RESP_USE_STRLEN);
-    return ESP_OK;
+	httpd_resp_send(req, resp, HTTPD_RESP_USE_STRLEN);
+	return ESP_OK;
 }
 
 //uri_favicon for /favicon.ico in form GET request
@@ -31,26 +29,26 @@ esp_err_t uri_favicon(httpd_req_t *req){
 
 /* URI handler structure for GET / */
 httpd_uri_t default_get = {
-    .uri      = "/",
-    .method   = HTTP_GET,
-    .handler  = get_handler,
-    .user_ctx = NULL
+	.uri      = "/",
+	.method   = HTTP_GET,
+	.handler  = get_handler,
+	.user_ctx = NULL
 };
 
 /* URI handler structure for GET /uri */
 httpd_uri_t uri_get = {
-    .uri      = "/uri",
-    .method   = HTTP_GET,
-    .handler  = uri_get_handler,
-    .user_ctx = NULL
+	.uri      = "/uri",
+	.method   = HTTP_GET,
+	.handler  = uri_get_handler,
+	.user_ctx = NULL
 };
 
 // URI handler structure for GET /favicon.ico as the default uri
 httpd_uri_t favicon = {
-    .uri      = "/favicon.ico",
-    .method   = HTTP_GET,
-    .handler  = uri_favicon,
-    .user_ctx = NULL
+	.uri      = "/favicon.ico",
+	.method   = HTTP_GET,
+	.handler  = uri_favicon,
+	.user_ctx = NULL
 };
 
 /* Function for starting the webserver */
