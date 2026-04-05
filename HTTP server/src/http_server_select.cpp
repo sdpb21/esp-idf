@@ -36,7 +36,7 @@ public:
 private:
 	int					_http_server_fd;
 	int					_http_client_fd; // fd of the connected HTTP client
-	vector<int>			_http_client_fd_list = vector<int>(MAX_CLIENTS);
+	vector<int>			_http_client_fd_list;
 	int					_epfd;
 	int					_port;
 	int					_max_pending;
@@ -47,7 +47,7 @@ private:
 	fd_set				readfds;
 	struct				timeval timeout;
 	socklen_t			_http_client_length;
-	string				_httpd_hdr_str = "HTTP/1.1 %s\r\nContent-Type: %s\r\nContent-Length: %d\r\n";
+	string				_httpd_hdr_str;
 	string				_request, _response;
 
 	int					socket_parameters_init();
@@ -84,6 +84,8 @@ HTTP_Server::HTTP_Server(int port, function<void (string&, string&)> request_han
 	_request_handler = request_handler;
 
 	_http_client_length = sizeof(http_client_addr);
+	_http_client_fd_list = vector<int>(MAX_CLIENTS, 0);
+	_httpd_hdr_str = "HTTP/1.1 %s\r\nContent-Type: %s\r\nContent-Length: %d\r\nConnection: close\r\n";
 }
 
 void HTTP_Server::start_server() {
@@ -114,13 +116,14 @@ void HTTP_Server::http_client_handler() {
 		if (_http_client_fd_list[i] > 0) {
 			FD_SET(_http_client_fd_list[i], &readfds);
 		}
+
 		if (_http_client_fd_list[i] > max_fd) {
 			max_fd = _http_client_fd_list[i];
 		}
 	}
 
 	sret = select(max_fd + 1, &readfds, WRITEFDS, EXCEPTFDS, &timeout);
-	if (sret == -1) {
+	if (sret < 0) {
 		perror("select() error");
 		return;
 	}
@@ -148,28 +151,44 @@ void HTTP_Server::http_client_handler() {
 			}
 		}
 
+		max_fd = _http_server_fd; // Reset max_fd to _http_server_fd in each loop
 		for (int i = 0; i < MAX_CLIENTS; i++) {
+			// Case: http_client_fd is bigger than the current max_fd
+			if (_http_client_fd_list[i] > max_fd) {
+				max_fd = _http_client_fd_list[i];
+			}
+
 			if (_http_client_fd_list[i]) {
 				_http_client_fd = _http_client_fd_list[i];
 				if (FD_ISSET(_http_client_fd, &readfds)) {
 					char req_buf[BUFFSIZE]; // Buffer for HTTP request from HTTP client
-					memset(req_buf, 0, sizeof(req_buf));
+					_request.clear();
 
-					int bytes_received = read(_http_client_fd, req_buf, BUFFSIZE);
-					if (bytes_received > 0) {
-						_request = req_buf;
+					// Keep reading from _http_client_fd until end of headers
+					while (true) {
+						memset(req_buf, 0, BUFFSIZE);
+						int n = read(_http_client_fd, req_buf, BUFFSIZE);;
+						if (n <= 0) break;
+
+						_request.append(req_buf);
+
+						if (_request.find("\r\n\r\n") != std::string::npos) break;
+					}
+
+					if (_request.size() > 0) {
 						_request_handler(_request, _response);
 
 						const char *content = _response.c_str();
 						const char *content_type = "text/html";
 						int rsp_buf_sz = _httpd_hdr_str.length() + strlen("200 OK") + strlen(content_type) + strlen("\r\n") + strlen(content);
 						char *res_buf = new char[rsp_buf_sz + 1];
-						memset(res_buf, 0, rsp_buf_sz);
 
+						memset(res_buf, 0, rsp_buf_sz + 1);
 						snprintf(res_buf, rsp_buf_sz, _httpd_hdr_str.c_str(), "200 OK", content_type, strlen(content));
 						strcat(res_buf, "\r\n");
 						strcat(res_buf, content);
 						write(_http_client_fd, res_buf, rsp_buf_sz);
+						delete[] res_buf;
 					} else {
 						vector<int>::iterator iter;
 						iter = find(_http_client_fd_list.begin(), _http_client_fd_list.end(), _http_client_fd);
@@ -186,7 +205,7 @@ void HTTP_Server::http_client_handler() {
 }
 
 int HTTP_Server::socket_parameters_init() {
-	struct 	sockaddr_in http_server_addr;
+	struct sockaddr_in http_server_addr;
 
 	_http_server_fd = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (_http_server_fd == -1) {
