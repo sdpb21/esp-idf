@@ -1,12 +1,10 @@
 # HTTP server built from TCP socket API to return an HTML page
 Feature:
 * A single-threaded event-driven HTTP server which uses select() to monitor a maxinum numbers of connected HTTP client
-* HTML page stored in SPIFFS memory
+* HTML page stored in SPIFFS memory, use [SPIFFS library](/SPIFFS/src/esp_spiffs_cpp/) to perform file operations
 
 Program:
 * [http_server_select.cpp](src/http_server_select.cpp): This example is intended for comprehensive and easy to understand the single-thread HTTP server with select.
-* Library [select_http_server](select_http_server): This library is intended for functions inheritance for other programs.
-* [http_server_select_querystring.cpp](src/http_server_select_querystring.cpp): Parse querystring from a login form from library ``select_http_server``.
 
 # A simple HTTP server with esp-idf built-in HTTP server library
 
@@ -53,9 +51,3 @@ esp_err_t get_handler(httpd_req_t *req) {
 	return ESP_OK;
 }
 ```
-
-# HTTP server to get data from a submitted form
-
-A HTTP server gets the entered data from a form by parsing the query string.
-
-Program: [http_server_with_form.c](src/http_server_with_form.c)
