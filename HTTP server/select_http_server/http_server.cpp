@@ -142,7 +142,7 @@ int HTTP_Server::socket_parameters_init() {
 vector<string> HTTP_Server::split_string_by_delim(string s, string delim) {
 	vector<string> all_substr;
 	std::size_t index = s.find(delim, 0);
-	string sub_str  = s.substr(0, index);
+	string sub_str = s.substr(0, index);
 	string new_string = s.substr(index+delim.length());
 
 	while (index != string::npos) { 
@@ -151,7 +151,7 @@ vector<string> HTTP_Server::split_string_by_delim(string s, string delim) {
 		}
 
 		index = new_string.find(delim, 0);
-		sub_str  = new_string.substr(0, index);
+		sub_str = new_string.substr(0, index);
 		new_string = new_string.substr(index+1);
 	}
 

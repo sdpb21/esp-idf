@@ -1,15 +1,12 @@
-/* Conclusion: is better to use this code starting from the softAP example than the HTTP simple
-   server example because the first includes a file where the SSID, password, channel and 
-   maximum number of connected stations can be defined instead of typing them here */
-
 /*  WiFi softAP Example
-
-   This example code is in the Public Domain (or CC0 licensed, at your option.)
-
-   Unless required by applicable law or agreed to in writing, this
-   software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-   CONDITIONS OF ANY KIND, either express or implied.
+	Author Samuel Pastrán <github.com/sdpb21>
 */
+
+/*	Conclusion: is better to use this code starting from the softAP example than the HTTP simple
+	server example because the first includes a file where the SSID, password, channel and 
+	maximum number of connected stations can be defined instead of typing them here
+*/
+
 #include <string.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -116,15 +113,15 @@ static const httpd_uri_t ledon = {
 <head>\
 <style>\
 .button {\
-  border: none;\
-  color: white;\
-  padding: 15px 32px;\
-  text-align: center;\
-  text-decoration: none;\
-  display: inline-block;\
-  font-size: 16px;\
-  margin: 4px 2px;\
-  cursor: pointer;\
+	border: none;\
+	color: white;\
+	padding: 15px 32px;\
+	text-align: center;\
+	text-decoration: none;\
+	display: inline-block;\
+	font-size: 16px;\
+	margin: 4px 2px;\
+	cursor: pointer;\
 }\
 \
 .button1 {background-color: #000000;} /* Green */\
@@ -143,25 +140,25 @@ static const httpd_uri_t ledon = {
 };
 
 static const httpd_uri_t root = {
-    .uri       = "/",
-    .method    = HTTP_GET,
-    .handler   = ledOFF_handler,
-    /* Let's pass response string in user
-     * context to demonstrate it's usage */
-    .user_ctx  = "<!DOCTYPE html>\
+	.uri		= "/",
+	.method		= HTTP_GET,
+	.handler	= ledOFF_handler,
+	/* Let's pass response string in user
+	* context to demonstrate it's usage */
+	.user_ctx	= "<!DOCTYPE html>\
 <html>\
 <head>\
 <style>\
 .button {\
-  border: none;\
-  color: white;\
-  padding: 15px 32px;\
-  text-align: center;\
-  text-decoration: none;\
-  display: inline-block;\
-  font-size: 16px;\
-  margin: 4px 2px;\
-  cursor: pointer;\
+	border: none;\
+	color: white;\
+	padding: 15px 32px;\
+	text-align: center;\
+	text-decoration: none;\
+	display: inline-block;\
+	font-size: 16px;\
+	margin: 4px 2px;\
+	cursor: pointer;\
 }\
 \
 .button1 {background-color: #4CAF50;} /* Green */\
@@ -182,57 +179,57 @@ static const httpd_uri_t root = {
 
 esp_err_t http_404_error_handler(httpd_req_t *req, httpd_err_code_t err)
 {
-    /* For any other URI send 404 and close socket */
-    httpd_resp_send_err(req, HTTPD_404_NOT_FOUND, "Some 404 error message");
-    return ESP_FAIL;
+	/* For any other URI send 404 and close socket */
+	httpd_resp_send_err(req, HTTPD_404_NOT_FOUND, "Some 404 error message");
+	return ESP_FAIL;
 }
 
 static httpd_handle_t start_webserver(void)
 {
-    httpd_handle_t server = NULL;
-    httpd_config_t config = HTTPD_DEFAULT_CONFIG();
-    config.lru_purge_enable = true;
+	httpd_handle_t server = NULL;
+	httpd_config_t config = HTTPD_DEFAULT_CONFIG();
+	config.lru_purge_enable = true;
 
-    // Start the httpd server
-    ESP_LOGI(TAG, "Starting server on port: '%d'", config.server_port);
-    if (httpd_start(&server, &config) == ESP_OK) {
-        // Set URI handlers
-        ESP_LOGI(TAG, "Registering URI handlers");
-        httpd_register_uri_handler(server, &ledoff);
-        httpd_register_uri_handler(server, &ledon);
-        httpd_register_uri_handler(server, &root);
-        return server;
-    }
+	// Start the httpd server
+	ESP_LOGI(TAG, "Starting server on port: '%d'", config.server_port);
+	if (httpd_start(&server, &config) == ESP_OK) {
+		// Set URI handlers
+		ESP_LOGI(TAG, "Registering URI handlers");
+		httpd_register_uri_handler(server, &ledoff);
+		httpd_register_uri_handler(server, &ledon);
+		httpd_register_uri_handler(server, &root);
+		return server;
+	}
 
-    ESP_LOGI(TAG, "Error starting server!");
-    return NULL;
+	ESP_LOGI(TAG, "Error starting server!");
+	return NULL;
 }
 
 static void stop_webserver(httpd_handle_t server)
 {
-    // Stop the httpd server
-    httpd_stop(server);
+	// Stop the httpd server
+	httpd_stop(server);
 }
 
 static void disconnect_handler(void* arg, esp_event_base_t event_base,
-                               int32_t event_id, void* event_data)
+								int32_t event_id, void* event_data)
 {
-    httpd_handle_t* server = (httpd_handle_t*) arg;
-    if (*server) {
-        ESP_LOGI(TAG, "Stopping webserver");
-        stop_webserver(*server);
-        *server = NULL;
-    }
+	httpd_handle_t* server = (httpd_handle_t*) arg;
+	if (*server) {
+		ESP_LOGI(TAG, "Stopping webserver");
+		stop_webserver(*server);
+		*server = NULL;
+	}
 }
 
 static void connect_handler(void* arg, esp_event_base_t event_base,
-                            int32_t event_id, void* event_data)
+							int32_t event_id, void* event_data)
 {
-    httpd_handle_t* server = (httpd_handle_t*) arg;
-    if (*server == NULL) {
-        ESP_LOGI(TAG, "Starting webserver");
-        *server = start_webserver();
-    }
+	httpd_handle_t* server = (httpd_handle_t*) arg;
+	if (*server == NULL) {
+		ESP_LOGI(TAG, "Starting webserver");
+		*server = start_webserver();
+	}
 }
 
 /******************* WEBSERVER CODE ENDS ************************/
@@ -245,20 +242,19 @@ static void configure_led (void)
 }
 
 
-/* The examples use WiFi configuration that you can set via project configuration menu.
-
-   If you'd rather not, just change the below entries to strings with
-   the config you want - ie #define EXAMPLE_WIFI_SSID "mywifissid"
+/*	The examples use WiFi configuration that you can set via project configuration menu.
+	If you'd rather not, just change the below entries to strings with
+	the config you want - ie #define EXAMPLE_WIFI_SSID "mywifissid"
 */
-#define EXAMPLE_ESP_WIFI_SSID      "qwert"
-#define EXAMPLE_ESP_WIFI_PASS      "1234"
-#define EXAMPLE_ESP_WIFI_CHANNEL   1
-#define EXAMPLE_MAX_STA_CONN       1
+#define EXAMPLE_ESP_WIFI_SSID		"SSID"
+#define EXAMPLE_ESP_WIFI_PASS		"PASSWORD"
+#define EXAMPLE_ESP_WIFI_CHANNEL	1
+#define EXAMPLE_MAX_STA_CONN		1
 
 
 
 static void wifi_event_handler(void* arg, esp_event_base_t event_base,
-                                    int32_t event_id, void* event_data)
+								int32_t event_id, void* event_data)
 {
     if (event_id == WIFI_EVENT_AP_STACONNECTED) {
         wifi_event_ap_staconnected_t* event = (wifi_event_ap_staconnected_t*) event_data;
