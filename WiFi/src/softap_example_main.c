@@ -1,6 +1,6 @@
 /*
  * WiFi softAP Example
- * Author Samuel Pastrán <github.com/sdpb21>
+ * Author: Samuel Pastrán <github.com/sdpb21>
  */
 #include <string.h>
 #include "freertos/FreeRTOS.h"

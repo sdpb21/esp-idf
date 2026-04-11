@@ -15,10 +15,10 @@ storage,	data,	spiffs,		,		448K,
 
 For big size factory and storage, like this:
 ```csv
-nvs,      data, nvs,     0x9000,  0x6000,
-phy_init, data, phy,     0xf000,  0x1000,
-factory,  app,  factory, 0x10000, 1M,
-storage,  data, spiffs,  0x180000,1M, // Add the address to the storage parition for proper flashing
+nvs,		data,	nvs,		0x9000,	0x6000,
+phy_init,	data,	phy,		0xf000,	0x1000,
+factory,	app,	factory, 	0x10000, 1M,
+storage,	data,	spiffs,		0x180000,1M, // Add the address to the storage parition for proper flashing
 ```
 This partitions will take 2.5 MB of flash while the default flash size is 2MB.
 

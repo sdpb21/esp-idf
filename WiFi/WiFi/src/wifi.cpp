@@ -3,8 +3,8 @@
 /*
 	Initialize dummy value for those static variables
 */
-string  WiFiClass::_ap_ssid		= "", WiFiClass::_ssid = "";
-string  WiFiClass::_ap_password = "", WiFiClass::_password = "";
+string WiFiClass::_ap_ssid		= "", WiFiClass::_ssid = "";
+string WiFiClass::_ap_password = "", WiFiClass::_password = "";
 wifi_config_t WiFiClass::sta_config, WiFiClass::ap_config; 
 uint32_t WiFiClass::_sta_state = WIFI_STA_DISCONNECTED;
 uint32_t WiFiClass::_ap_state = WIFI_AP_STOP;

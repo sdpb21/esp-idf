@@ -1,5 +1,5 @@
 /*	WiFi softAP Example
-	Author Samuel Pastrán <github.com/sdpb21>
+	Author: Samuel Pastrán <github.com/sdpb21>
 
 	Conclusion: It's better to use this code starting from the softAP example than the HTTP simple
 	server example because the first includes a file where the SSID, password, channel and 
@@ -17,7 +17,7 @@
 
 #include "lwip/err.h"
 #include "lwip/sys.h"
-////////////////////////////////////////////////////////////////////////////////////////////////
+
 #include "esp_system.h"
 
 #include "esp_err.h"
@@ -101,12 +101,12 @@ static esp_err_t ledON_handler(httpd_req_t *req)
 }
 
 static const httpd_uri_t ledon = {
-	.uri       = "/ledon",
-	.method    = HTTP_GET,
-	.handler   = ledON_handler,
+	.uri = "/ledon",
+	.method = HTTP_GET,
+	.handler = ledON_handler,
 	/* Let's pass response string in user
 	* context to demonstrate it's usage */
-	.user_ctx  = "<!DOCTYPE html>\
+	.user_ctx = "<!DOCTYPE html>\
 <html>\
 <head>\
 <style>\

@@ -1,10 +1,5 @@
-/*  WiFi softAP Example
-
-   This example code is in the Public Domain (or CC0 licensed, at your option.)
-
-   Unless required by applicable law or agreed to in writing, this
-   software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-   CONDITIONS OF ANY KIND, either express or implied.
+/*	WiFi softAP Example
+	Author: Samuel Pastrán <github.com/sdpb21>
 */
 #include <string.h>
 #include "freertos/FreeRTOS.h"
@@ -21,49 +16,45 @@
 #include <sys/param.h>
 #include "esp_netif.h"
 #include <esp_http_server.h>
-//#include "driver/gpio.h"
 #include "driver/mcpwm_prelude.h"
 
 static const char *TAG = "webserver";
 
-//#define LED GPIO_NUM_2
 /* The examples use WiFi configuration that you can set via project configuration menu.
 
-   If you'd rather not, just change the below entries to strings with
-   the config you want - ie #define EXAMPLE_WIFI_SSID "mywifissid"
+	If you'd rather not, just change the below entries to strings with
+	the config you want - ie #define EXAMPLE_WIFI_SSID "mywifissid"
 */
-#define EXAMPLE_ESP_WIFI_SSID      CONFIG_ESP_WIFI_SSID
-#define EXAMPLE_ESP_WIFI_PASS      CONFIG_ESP_WIFI_PASSWORD
-#define EXAMPLE_ESP_WIFI_CHANNEL   CONFIG_ESP_WIFI_CHANNEL
-#define EXAMPLE_MAX_STA_CONN       CONFIG_ESP_MAX_STA_CONN
+#define EXAMPLE_ESP_WIFI_SSID		CONFIG_ESP_WIFI_SSID
+#define EXAMPLE_ESP_WIFI_PASS		CONFIG_ESP_WIFI_PASSWORD
+#define EXAMPLE_ESP_WIFI_CHANNEL	CONFIG_ESP_WIFI_CHANNEL
+#define EXAMPLE_MAX_STA_CONN		CONFIG_ESP_MAX_STA_CONN
 
 // Please consult the datasheet of your servo before changing the following parameters
-#define SERVO_MIN_PULSEWIDTH_US 500  // Minimum pulse width in microsecond
-#define SERVO_MAX_PULSEWIDTH_US 2500  // Maximum pulse width in microsecond
-#define SERVO_MIN_DEGREE        -90   // Minimum angle
-#define SERVO_MAX_DEGREE        90    // Maximum angle
+#define SERVO_MIN_PULSEWIDTH_US 500 // Minimum pulse width in microsecond
+#define SERVO_MAX_PULSEWIDTH_US 2500 // Maximum pulse width in microsecond
+#define SERVO_MIN_DEGRE 		-90 // Minimum angle
+#define SERVO_MAX_DEGREE		90	// Maximum angle
 
-#define SERVO_PULSE_GPIO             26       // GPIO connects to the PWM signal line
-#define SERVO_TIMEBASE_RESOLUTION_HZ 1000000  // 1MHz, 1us per tick
-#define SERVO_TIMEBASE_PERIOD        20000    // 20000 ticks, 20ms
+#define SERVO_PULSE_GPIO				26 // GPIO connects to the PWM signal line
+#define SERVO_TIMEBASE_RESOLUTION_HZ	1000000 // 1MHz, 1us per tick
+#define SERVO_TIMEBASE_PERIOD			20000 // 20000 ticks, 20ms
 
-#define PUSH_SWITCH 71          /* Angle to pass as parameter to example_angle_to_compare function 
-                                   to move the servo to push the interruptor */
-#define RETURN_TO_ZERO_DEG  0   /* Angle to pass as parameter to example_angle_to_compare function 
-                                   to return the servo to the zero degrees position */
+#define PUSH_SWITCH 71	/* Angle to pass as parameter to example_angle_to_compare function to move the servo to push the interruptor */
+#define RETURN_TO_ZERO_DEG 0 /* Angle to pass as parameter to example_angle_to_compare function to return the servo to the zero degrees position */
 
 mcpwm_cmpr_handle_t comparator;
 
 /* This function returns the angle in degrees converted to a value proportional to the pulse 
-    width in microseconds starting from SERVO_MIN_PULSEWIDTH_US */
+	width in microseconds starting from SERVO_MIN_PULSEWIDTH_US */
 static inline uint32_t example_angle_to_compare(int angle)
 {
-    return (angle - SERVO_MIN_DEGREE) * (SERVO_MAX_PULSEWIDTH_US - SERVO_MIN_PULSEWIDTH_US) / (SERVO_MAX_DEGREE - SERVO_MIN_DEGREE) + SERVO_MIN_PULSEWIDTH_US;
+	return (angle - SERVO_MIN_DEGREE) * (SERVO_MAX_PULSEWIDTH_US - SERVO_MIN_PULSEWIDTH_US) / (SERVO_MAX_DEGREE - SERVO_MIN_DEGREE) + SERVO_MIN_PULSEWIDTH_US;
 }
 /*
-    (angle - SERVO_MIN_DEGREE) * (SERVO_MAX_PULSEWIDTH_US - SERVO_MIN_PULSEWIDTH_US)
-    -------------------------------------------------------------------------------- + SERVO_MIN_PULSEWIDTH_US
-                            (SERVO_MAX_DEGREE - SERVO_MIN_DEGREE)
+	(angle - SERVO_MIN_DEGREE) * (SERVO_MAX_PULSEWIDTH_US - SERVO_MIN_PULSEWIDTH_US)
+	-------------------------------------------------------------------------------- + SERVO_MIN_PULSEWIDTH_US
+							(SERVO_MAX_DEGREE - SERVO_MIN_DEGREE)
 */
 
 /* Handler function to turn off the LED */
@@ -74,48 +65,47 @@ static esp_err_t ledOFF_handler(httpd_req_t *req)
 	ESP_LOGI(TAG, "********* ledOFF_handler starts");
 
 	/* Set the motor control PWM comparator's compare value to change the PWM frequency and
-       the angle with each while loop iteration */
-    ESP_ERROR_CHECK(mcpwm_comparator_set_compare_value(comparator, example_angle_to_compare(PUSH_SWITCH)));
-    //Add delay, since it takes time for servo to rotate, usually 200ms/60degree rotation under 5V power supply
-    vTaskDelay(pdMS_TO_TICKS(1500));
-    ESP_ERROR_CHECK(mcpwm_comparator_set_compare_value(comparator, example_angle_to_compare(RETURN_TO_ZERO_DEG)));
-	
-    const char *response = (const char *) req->user_ctx;
-    /* Next line sends a complete HTTP response. */
+	the angle with each while loop iteration */
+	ESP_ERROR_CHECK(mcpwm_comparator_set_compare_value(comparator, example_angle_to_compare(PUSH_SWITCH)));
+	//Add delay, since it takes time for servo to rotate, usually 200ms/60degree rotation under 5V power supply
+	vTaskDelay(pdMS_TO_TICKS(1500));
+	ESP_ERROR_CHECK(mcpwm_comparator_set_compare_value(comparator, example_angle_to_compare(RETURN_TO_ZERO_DEG)));
+
+	const char *response = (const char *) req->user_ctx;
+	/* Next line sends a complete HTTP response. */
 	error = httpd_resp_send(req, response, strlen(response));
 	
-    if (error != ESP_OK)
-	{
+	if (error != ESP_OK) {
 		ESP_LOGI(TAG, "Error %d while sending Response", error);
 	}
 	else ESP_LOGI(TAG, "Response sent Successfully");
+
+	return error;
 	
-    return error;
-    
 }
 
 /* Struct with data to be passed as parameter to the httpd_register_uri_handler function, to 
-   register the URI handler for the function to get the LED turned off. */
+	register the URI handler for the function to get the LED turned off. */
 static const httpd_uri_t ledoff = {
-    .uri       = "/ledoff",
-    .method    = HTTP_GET,
-    .handler   = ledOFF_handler,
-    /* Let's pass response string in user
-     * context to demonstrate it's usage */
-    .user_ctx  = "<!DOCTYPE html>\
+	.uri		= "/ledoff",
+	.method		= HTTP_GET,
+	.handler	= ledOFF_handler,
+	/* Let's pass response string in user
+	* context to demonstrate it's usage */
+	.user_ctx	= "<!DOCTYPE html>\
 <html>\
 <head>\
 <style>\
 .button {\
-  border: none;\
-  color: white;\
-  padding: 15px 32px;\
-  text-align: center;\
-  text-decoration: none;\
-  display: inline-block;\
-  font-size: 16px;\
-  margin: 4px 2px;\
-  cursor: pointer;\
+	border: none;\
+	color: white;\
+	padding: 15px 32px;\
+	text-align: center;\
+	text-decoration: none;\
+	display: inline-block;\
+	font-size: 16px;\
+	margin: 4px 2px;\
+	cursor: pointer;\
 }\
 \
 .button1 {background-color: #4CAF50;} /* Green */\
@@ -139,46 +129,44 @@ static esp_err_t ledON_handler(httpd_req_t *req)
 	esp_err_t error;
 
 	ESP_LOGI(TAG, "************* ledON_handler starts");
-    /* Next line sets the output level of the LED pin to 1 to turn on the LED. */
+	/* Next line sets the output level of the LED pin to 1 to turn on the LED. */
 	//gpio_set_level(LED, 1);
-	
-    const char *response = (const char *) req->user_ctx;
-    /* Next line sends a complete HTTP response to the request with the contents of the buffer
-       pointed by response. */
+
+	const char *response = (const char *) req->user_ctx;
+	/* Next line sends a complete HTTP response to the request with the contents of the buffer
+	pointed by response. */
 	error = httpd_resp_send(req, response, strlen(response));
-	
-    if (error != ESP_OK)
-	{
+
+	if (error != ESP_OK) {
 		ESP_LOGI(TAG, "Error %d while sending Response", error);
 	}
 	else ESP_LOGI(TAG, "Response sent Successfully");
 	
-    return error;
+	return error;
 
 }
 
-/* Struct with data to be passed as parameter to the httpd_register_uri_handler function, to 
-   register the URI handler for the function to get the LED turned on. */
+/*	Struct with data to be passed as parameter to the httpd_register_uri_handler function, to 
+	register the URI handler for the function to get the LED turned on. */
 static const httpd_uri_t ledon = {
-    .uri       = "/ledon",
-    .method    = HTTP_GET,
-    .handler   = ledON_handler,
-    /* Let's pass response string in user
-     * context to demonstrate it's usage */
-    .user_ctx  = "<!DOCTYPE html>\
+	.uri = "/ledon",
+	.method = HTTP_GET,
+	.handler = ledON_handler,
+	/* Let's pass response string in user context to demonstrate it's usage */
+	.user_ctx = "<!DOCTYPE html>\
 <html>\
 <head>\
 <style>\
 .button {\
-  border: none;\
-  color: white;\
-  padding: 15px 32px;\
-  text-align: center;\
-  text-decoration: none;\
-  display: inline-block;\
-  font-size: 16px;\
-  margin: 4px 2px;\
-  cursor: pointer;\
+	border: none;\
+	color: white;\
+	padding: 15px 32px;\
+	text-align: center;\
+	text-decoration: none;\
+	display: inline-block;\
+	font-size: 16px;\
+	margin: 4px 2px;\
+	cursor: pointer;\
 }\
 \
 .button1 {background-color: #000000;} /* Green */\
@@ -196,28 +184,27 @@ static const httpd_uri_t ledon = {
 </html>"
 };
 
-/* Struct with data to be passed as parameter to the httpd_register_uri_handler function, to 
-   register the URI handler for the root screen of the webserver. */
+/*	Struct with data to be passed as parameter to the httpd_register_uri_handler function, to
+	register the URI handler for the root screen of the webserver. */
 static const httpd_uri_t root = {
-    .uri       = "/",
-    .method    = HTTP_GET,
-    .handler   = ledOFF_handler,
-    /* Let's pass response string in user
-     * context to demonstrate it's usage */
-    .user_ctx  = "<!DOCTYPE html>\
+	.uri = "/",
+	.method = HTTP_GET,
+	.handler = ledOFF_handler,
+	/* Let's pass response string in user context to demonstrate it's usage */
+	.user_ctx = "<!DOCTYPE html>\
 <html>\
 <head>\
 <style>\
 .button {\
-  border: none;\
-  color: white;\
-  padding: 15px 32px;\
-  text-align: center;\
-  text-decoration: none;\
-  display: inline-block;\
-  font-size: 16px;\
-  margin: 4px 2px;\
-  cursor: pointer;\
+	border: none;\
+	color: white;\
+	padding: 15px 32px;\
+	text-align: center;\
+	text-decoration: none;\
+	display: inline-block;\
+	font-size: 16px;\
+	margin: 4px 2px;\
+	cursor: pointer;\
 }\
 \
 .button1 {background-color: #4CAF50;} /* Green */\
@@ -237,163 +224,163 @@ static const httpd_uri_t root = {
 
 esp_err_t http_404_error_handler(httpd_req_t *req, httpd_err_code_t err)
 {
-    ESP_LOGI(TAG, "************* http_404_error_handler starts");
-    /* For any other URI send 404 and close socket */
-    httpd_resp_send_err(req, HTTPD_404_NOT_FOUND, "Some 404 error message");
-    return ESP_FAIL;
+	ESP_LOGI(TAG, "************* http_404_error_handler starts");
+	/* For any other URI send 404 and close socket */
+	httpd_resp_send_err(req, HTTPD_404_NOT_FOUND, "Some 404 error message");
+	return ESP_FAIL;
 }
 
 static httpd_handle_t start_webserver(void)
 {
-    ESP_LOGI(TAG, "********** start_webserver starts");
-    httpd_handle_t server = NULL;
-    // Define and initialize an HTTP server config struct, with default values
-    httpd_config_t config = HTTPD_DEFAULT_CONFIG();
-    config.lru_purge_enable = true;
+	ESP_LOGI(TAG, "********** start_webserver starts");
+	httpd_handle_t server = NULL;
+	// Define and initialize an HTTP server config struct, with default values
+	httpd_config_t config = HTTPD_DEFAULT_CONFIG();
+	config.lru_purge_enable = true;
 
-    // Start the httpd server
-    ESP_LOGI(TAG, "Starting server on port: '%d'", config.server_port);
-    /* Next line starts the webserver. Creates an instance of HTTP server and allocates 
-       memory/resources for it depending upon the specified configuration. */
-    if (httpd_start(&server, &config) == ESP_OK) {
-        // Set URI (Uniform Resource Identifier) handlers
-        ESP_LOGI(TAG, "Registering URI handlers");
-        httpd_register_uri_handler(server, &ledoff);
-        httpd_register_uri_handler(server, &ledon);
-        httpd_register_uri_handler(server, &root);
-        return server;
-    }
+	// Start the httpd server
+	ESP_LOGI(TAG, "Starting server on port: '%d'", config.server_port);
+	/* Next line starts the webserver. Creates an instance of HTTP server and allocates 
+	memory/resources for it depending upon the specified configuration. */
+	if (httpd_start(&server, &config) == ESP_OK) {
+		// Set URI (Uniform Resource Identifier) handlers
+		ESP_LOGI(TAG, "Registering URI handlers");
+		httpd_register_uri_handler(server, &ledoff);
+		httpd_register_uri_handler(server, &ledon);
+		httpd_register_uri_handler(server, &root);
+		return server;
+	}
 
-    ESP_LOGI(TAG, "Error starting server!");
-    return NULL;
+	ESP_LOGI(TAG, "Error starting server!");
+	return NULL;
 }
 
 static void stop_webserver(httpd_handle_t server)
 {
-    // Stop the httpd server
-    ESP_LOGI(TAG, "************ stop_webserver starts");
-    httpd_stop(server);
+	// Stop the httpd server
+	ESP_LOGI(TAG, "************ stop_webserver starts");
+	httpd_stop(server);
 }
 
 static void disconnect_handler(void* arg, esp_event_base_t event_base,
-                               int32_t event_id, void* event_data)
+							int32_t event_id, void* event_data)
 {
-    ESP_LOGI(TAG, "*************** disconnect_handler starts");
-    httpd_handle_t* server = (httpd_handle_t*) arg;
-    if (*server) {
-        ESP_LOGI(TAG, "Stopping webserver");
-        stop_webserver(*server);
-        *server = NULL;
-    }
+	ESP_LOGI(TAG, "*************** disconnect_handler starts");
+	httpd_handle_t* server = (httpd_handle_t*) arg;
+	if (*server) {
+		ESP_LOGI(TAG, "Stopping webserver");
+		stop_webserver(*server);
+		*server = NULL;
+	}
 }
 
 // Handler function to start the server when a station connects to the access point
 static void connect_handler(void* arg, esp_event_base_t event_base,
-                            int32_t event_id, void* event_data)
+							int32_t event_id, void* event_data)
 {
-    ESP_LOGI(TAG, "************** connect_handler starts");
-    httpd_handle_t* server = (httpd_handle_t*) arg;
-    if (*server == NULL) {
-        ESP_LOGI(TAG, "Starting webserver");
-        *server = start_webserver();
-    }
+	ESP_LOGI(TAG, "************** connect_handler starts");
+	httpd_handle_t* server = (httpd_handle_t*) arg;
+	if (*server == NULL) {
+		ESP_LOGI(TAG, "Starting webserver");
+		*server = start_webserver();
+	}
 }
 /*
 static void configure_led(void)
 {
 	ESP_LOGI(TAG, "************* configure_led started");
-    gpio_reset_pin (LED);
+	gpio_reset_pin (LED);
 
 	gpio_set_direction (LED, GPIO_MODE_OUTPUT);
 }
 */
 static void wifi_event_handler(void* arg, esp_event_base_t event_base,
-                                    int32_t event_id, void* event_data)
+								int32_t event_id, void* event_data)
 {
-    ESP_LOGI(TAG, "***************** wifi_event_handler starts");
-    if (event_id == WIFI_EVENT_AP_STACONNECTED) {
-        wifi_event_ap_staconnected_t* event = (wifi_event_ap_staconnected_t*) event_data;
-        ESP_LOGI(TAG, "station "MACSTR" join, AID=%d",
-                 MAC2STR(event->mac), event->aid);
-    } else if (event_id == WIFI_EVENT_AP_STADISCONNECTED) {
-        wifi_event_ap_stadisconnected_t* event = (wifi_event_ap_stadisconnected_t*) event_data;
-        ESP_LOGI(TAG, "station "MACSTR" leave, AID=%d",
-                 MAC2STR(event->mac), event->aid);
-    }
+	ESP_LOGI(TAG, "***************** wifi_event_handler starts");
+	if (event_id == WIFI_EVENT_AP_STACONNECTED) {
+		wifi_event_ap_staconnected_t* event = (wifi_event_ap_staconnected_t*) event_data;
+		ESP_LOGI(TAG, "station "MACSTR" join, AID=%d",
+				MAC2STR(event->mac), event->aid);
+	} else if (event_id == WIFI_EVENT_AP_STADISCONNECTED) {
+		wifi_event_ap_stadisconnected_t* event = (wifi_event_ap_stadisconnected_t*) event_data;
+		ESP_LOGI(TAG, "station "MACSTR" leave, AID=%d",
+				MAC2STR(event->mac), event->aid);
+	}
 }
 
 void wifi_init_softap(void)
 {
-    ESP_LOGI(TAG, "************ wifi_init_softap starts");
-    /* Initialize the underlying TCP/IP stack and check for errors, stops the program if returned
-       value is not ESP_OK */
-    ESP_ERROR_CHECK(esp_netif_init());
-    /* Creates a default event loop. Loop library allows components to declare events so that
-       other components can register handlers (functions that executes when those events happens).
-       An event indicates an important occurrance such as a WiFi successful connection to an
-       access point. The event loop is the bridge between events and event handlers. The default
-       event loop is a special type of loop used for system events such as WiFi events. */
-    ESP_ERROR_CHECK(esp_event_loop_create_default());
-    /* This API creates an esp_netif object with the default WiFi access point configuration,
-       attaches the netif object to WiFi access point and registers WiFi AP event handlers to the
-       default event loop. This API uses assert() to check for potential errors, so it could abbort
-       the program (Note that the default event loop needs to be created prior to calling this API) */
-    esp_netif_create_default_wifi_ap();
+	ESP_LOGI(TAG, "************ wifi_init_softap starts");
+	/* Initialize the underlying TCP/IP stack and check for errors, stops the program if returned
+	value is not ESP_OK */
+	ESP_ERROR_CHECK(esp_netif_init());
+	/* Creates a default event loop. Loop library allows components to declare events so that
+	other components can register handlers (functions that executes when those events happens).
+	An event indicates an important occurrance such as a WiFi successful connection to an
+	access point. The event loop is the bridge between events and event handlers. The default
+	event loop is a special type of loop used for system events such as WiFi events. */
+	ESP_ERROR_CHECK(esp_event_loop_create_default());
+	/* This API creates an esp_netif object with the default WiFi access point configuration,
+	attaches the netif object to WiFi access point and registers WiFi AP event handlers to the
+	default event loop. This API uses assert() to check for potential errors, so it could abbort
+	the program (Note that the default event loop needs to be created prior to calling this API) */
+	esp_netif_create_default_wifi_ap();
 
-    /* Declares the WiFi stack configuration parameters structure and initializes it with default
-       values via WIFI_INIT_CONFIG_DEFAULT macro as a step to be passed to the esp_wifi_init
-       function call */
-    wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
-    /* Initializes the WiFi, allocates resources for WiFi drivers such as WiFi control structure,
-       RX/TX buffer, WiFi NVS structure, etc. Also starts WiFi task. This API must be called
-       before all other WiFi APIs must be called. You must always use WIFI_INIT_CONFIG_DEFAULT to
-       set the configuration default values, this guarantees that all the fields get the right
-       value when more fields are added to wifi_init_config_t structure in a future release. If
-       you want to set your own initial values, overwrite the default values which are setted by
-       WIFI_INIT_CONFIG_DEFAULT. Please be notified that the field 'magic' of wifi_init_config_t
-       should always be WIFI_INIT_CONFIG_MAGIC! (THIS IS WEIRD, DIG INTO THIS IN THE FUTURE),
-       and check for errors */
-    ESP_ERROR_CHECK(esp_wifi_init(&cfg));
+	/* Declares the WiFi stack configuration parameters structure and initializes it with default
+	values via WIFI_INIT_CONFIG_DEFAULT macro as a step to be passed to the esp_wifi_init
+	function call */
+	wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+	/* Initializes the WiFi, allocates resources for WiFi drivers such as WiFi control structure,
+	RX/TX buffer, WiFi NVS structure, etc. Also starts WiFi task. This API must be called
+	before all other WiFi APIs must be called. You must always use WIFI_INIT_CONFIG_DEFAULT to
+	set the configuration default values, this guarantees that all the fields get the right
+	value when more fields are added to wifi_init_config_t structure in a future release. If
+	you want to set your own initial values, overwrite the default values which are setted by
+	WIFI_INIT_CONFIG_DEFAULT. Please be notified that the field 'magic' of wifi_init_config_t
+	should always be WIFI_INIT_CONFIG_MAGIC! (THIS IS WEIRD, DIG INTO THIS IN THE FUTURE),
+	and check for errors */
+	ESP_ERROR_CHECK(esp_wifi_init(&cfg));
 
-    /* Registers an instance of the WiFi event handler (wifi_event_handler) to the default loop,
-       when any WiFi event happens, the wifi_event_handler handler function is called. Calling 
-       this function with instance (last argument) set to NULL is equivalent to calling 
-       esp_event_handler_register. So, in the next line, we have that case. */
-    ESP_ERROR_CHECK(esp_event_handler_instance_register(WIFI_EVENT,
-                                                        ESP_EVENT_ANY_ID,
-                                                        &wifi_event_handler,
-                                                        NULL,
-                                                        NULL));
+	/* Registers an instance of the WiFi event handler (wifi_event_handler) to the default loop,
+	when any WiFi event happens, the wifi_event_handler handler function is called. Calling 
+	this function with instance (last argument) set to NULL is equivalent to calling 
+	esp_event_handler_register. So, in the next line, we have that case. */
+	ESP_ERROR_CHECK(esp_event_handler_instance_register(WIFI_EVENT,
+														ESP_EVENT_ANY_ID,
+														&wifi_event_handler,
+														NULL,
+														NULL));
 
-    /* Soft-AP configuration settings for the device. */
-    wifi_config_t wifi_config = {
-        .ap = {
-            .ssid = EXAMPLE_ESP_WIFI_SSID,
-            .ssid_len = strlen(EXAMPLE_ESP_WIFI_SSID),
-            .channel = EXAMPLE_ESP_WIFI_CHANNEL,
-            .password = EXAMPLE_ESP_WIFI_PASS,
-            .max_connection = EXAMPLE_MAX_STA_CONN, // Maximum stations number allowed to connect in.
-            .authmode = WIFI_AUTH_WPA_WPA2_PSK
-        },
-    };
-    /* If there is no password, configure the access point as open (without password). */
-    if (strlen(EXAMPLE_ESP_WIFI_PASS) == 0) {
-        wifi_config.ap.authmode = WIFI_AUTH_OPEN;
-    }
+	/* Soft-AP configuration settings for the device. */
+	wifi_config_t wifi_config = {
+		.ap = {
+			.ssid = EXAMPLE_ESP_WIFI_SSID,
+			.ssid_len = strlen(EXAMPLE_ESP_WIFI_SSID),
+			.channel = EXAMPLE_ESP_WIFI_CHANNEL,
+			.password = EXAMPLE_ESP_WIFI_PASS,
+			.max_connection = EXAMPLE_MAX_STA_CONN, // Maximum stations number allowed to connect in.
+			.authmode = WIFI_AUTH_WPA_WPA2_PSK
+		},
+	};
+	/* If there is no password, configure the access point as open (without password). */
+	if (strlen(EXAMPLE_ESP_WIFI_PASS) == 0) {
+		wifi_config.ap.authmode = WIFI_AUTH_OPEN;
+	}
 
-    /* Sets the WiFi operating mode as access point and check for errors, if returned value isn't
-       ESP_OK, terminates the program. */
-    ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_AP));
-    /* Sets the configuration of the access point, the configuration will be stored in the NVS for
-       soft-AP, check for errors, if returned value is not ESP_OK, terminates the program */
-    ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_AP, &wifi_config));
-    /* Next line starts the WiFi according to current configuration, if mode is WIFI_MODE_AP, it 
-       creates soft-AP control block and starts soft-AP */
-    ESP_ERROR_CHECK(esp_wifi_start());
+	/* Sets the WiFi operating mode as access point and check for errors, if returned value isn't
+	ESP_OK, terminates the program. */
+	ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_AP));
+	/* Sets the configuration of the access point, the configuration will be stored in the NVS for
+	soft-AP, check for errors, if returned value is not ESP_OK, terminates the program */
+	ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_AP, &wifi_config));
+	/* Next line starts the WiFi according to current configuration, if mode is WIFI_MODE_AP, it 
+	creates soft-AP control block and starts soft-AP */
+	ESP_ERROR_CHECK(esp_wifi_start());
 
-    ESP_LOGI(TAG, "wifi_init_softap finished. SSID:%s password:%s channel:%d",
-             EXAMPLE_ESP_WIFI_SSID, EXAMPLE_ESP_WIFI_PASS, EXAMPLE_ESP_WIFI_CHANNEL);
-    ESP_LOGI(TAG, "************** wifi_init_softap ends");
+	ESP_LOGI(TAG, "wifi_init_softap finished. SSID:%s password:%s channel:%d",
+			EXAMPLE_ESP_WIFI_SSID, EXAMPLE_ESP_WIFI_PASS, EXAMPLE_ESP_WIFI_CHANNEL);
+	ESP_LOGI(TAG, "************** wifi_init_softap ends");
 }
 
 void app_main(void)
@@ -401,117 +388,117 @@ void app_main(void)
 
 	ESP_LOGI(TAG, "Create timer and operator");
 
-    // Step 1: creates a null pointer timer handle
-    mcpwm_timer_handle_t timer = NULL;
+	// Step 1: creates a null pointer timer handle
+	mcpwm_timer_handle_t timer = NULL;
 
-    // Step 2: initializes the timer configuration struct
-    mcpwm_timer_config_t timer_config = {
-        .group_id = 0,
-        .clk_src = MCPWM_TIMER_CLK_SRC_DEFAULT,
-        .resolution_hz = SERVO_TIMEBASE_RESOLUTION_HZ,
-        .period_ticks = SERVO_TIMEBASE_PERIOD,
-        .count_mode = MCPWM_TIMER_COUNT_MODE_UP,
-    };
+	// Step 2: initializes the timer configuration struct
+	mcpwm_timer_config_t timer_config = {
+		.group_id = 0,
+		.clk_src = MCPWM_TIMER_CLK_SRC_DEFAULT,
+		.resolution_hz = SERVO_TIMEBASE_RESOLUTION_HZ,
+		.period_ticks = SERVO_TIMEBASE_PERIOD,
+		.count_mode = MCPWM_TIMER_COUNT_MODE_UP,
+	};
 
-    /* Step 3: creates a motor control PWM timer and check the error code,
-       if not ESP_OK, terminates the program */
-    ESP_ERROR_CHECK(mcpwm_new_timer(&timer_config, &timer));
+	/* Step 3: creates a motor control PWM timer and check the error code,
+	if not ESP_OK, terminates the program */
+	ESP_ERROR_CHECK(mcpwm_new_timer(&timer_config, &timer));
 
-    /* Step 4: create a null pointer to a struct of type mcpwm_oper_t (a motor control PWM
-       operator handle) */
-    mcpwm_oper_handle_t oper = NULL;
+	/* Step 4: create a null pointer to a struct of type mcpwm_oper_t (a motor control PWM
+	operator handle) */
+	mcpwm_oper_handle_t oper = NULL;
 
-    /* Step 5: create a motor control PWM operator configuration struct and initialize his
-       group_id */
-    mcpwm_operator_config_t operator_config = {
-        .group_id = 0, // operator must be in the same group to the timer
-    };
+	/* Step 5: create a motor control PWM operator configuration struct and initialize his
+	group_id */
+	mcpwm_operator_config_t operator_config = {
+		.group_id = 0, // operator must be in the same group to the timer
+	};
 
-    /* Step 6: create a motor control PWM operator and check the error code, if not ESP_OK,
-       terminates the program */
-    ESP_ERROR_CHECK(mcpwm_new_operator(&operator_config, &oper));
+	/* Step 6: create a motor control PWM operator and check the error code, if not ESP_OK,
+	terminates the program */
+	ESP_ERROR_CHECK(mcpwm_new_operator(&operator_config, &oper));
 
-    ESP_LOGI(TAG, "Connect timer and operator");
+	ESP_LOGI(TAG, "Connect timer and operator");
 
-    /* Step 7: Connect the motor control PWM operator and timer, so that the operator can be
-       driven by the timer */
-    ESP_ERROR_CHECK(mcpwm_operator_connect_timer(oper, timer));
+	/* Step 7: Connect the motor control PWM operator and timer, so that the operator can be
+	driven by the timer */
+	ESP_ERROR_CHECK(mcpwm_operator_connect_timer(oper, timer));
 
-    ESP_LOGI(TAG, "Create comparator and generator from the operator");
+	ESP_LOGI(TAG, "Create comparator and generator from the operator");
 
-    /* Step 8: Define the motor control PWM comparator handle (a pointer to a struct of type
-       mcpwm_cmpr_t) and initialize it as NULL */
-    comparator = NULL;
+	/* Step 8: Define the motor control PWM comparator handle (a pointer to a struct of type
+	mcpwm_cmpr_t) and initialize it as NULL */
+	comparator = NULL;
 
-    /* Step 9: Define the motor control PWM comparator configuration structure */
-    mcpwm_comparator_config_t comparator_config = {
-        .flags.update_cmp_on_tez = true,
-    };
+	/* Step 9: Define the motor control PWM comparator configuration structure */
+	mcpwm_comparator_config_t comparator_config = {
+		.flags.update_cmp_on_tez = true,
+	};
 
-    /* Step 10: Create the comparator for the operator previously created */
-    ESP_ERROR_CHECK(mcpwm_new_comparator(oper, &comparator_config, &comparator));
+	/* Step 10: Create the comparator for the operator previously created */
+	ESP_ERROR_CHECK(mcpwm_new_comparator(oper, &comparator_config, &comparator));
 
-    /* Step 11: Define the motor control PWM generator handle (a pointer to a mcpwm_gen_t type
-       struct) */
-    mcpwm_gen_handle_t generator = NULL;
+	/* Step 11: Define the motor control PWM generator handle (a pointer to a mcpwm_gen_t type
+	struct) */
+	mcpwm_gen_handle_t generator = NULL;
 
-    /* Step 12: Define the motor control PWM generator configuration structure */
-    mcpwm_generator_config_t generator_config = {
-        .gen_gpio_num = SERVO_PULSE_GPIO,
-    };
+	/* Step 12: Define the motor control PWM generator configuration structure */
+	mcpwm_generator_config_t generator_config = {
+		.gen_gpio_num = SERVO_PULSE_GPIO,
+	};
 
-    /* Step 13: Allocates the generator for the previously created operator and check the error
-       code, if not ESP_OK, terminates the program */
-    ESP_ERROR_CHECK(mcpwm_new_generator(oper, &generator_config, &generator));
+	/* Step 13: Allocates the generator for the previously created operator and check the error
+	code, if not ESP_OK, terminates the program */
+	ESP_ERROR_CHECK(mcpwm_new_generator(oper, &generator_config, &generator));
 
-    /*/ Step 14: Set the initial compare value, so that the servo will spin to the center 
-        position, the angle is converted to a pulsewidth value in microseconds, also checks
-        the error code */
-    ESP_ERROR_CHECK(mcpwm_comparator_set_compare_value(comparator, example_angle_to_compare(0)));
+	/*/ Step 14: Set the initial compare value, so that the servo will spin to the center 
+		position, the angle is converted to a pulsewidth value in microseconds, also checks
+		the error code */
+	ESP_ERROR_CHECK(mcpwm_comparator_set_compare_value(comparator, example_angle_to_compare(0)));
 
-    ESP_LOGI(TAG, "Set generator action on timer and compare event");
-    
-    /*/ Step 15: Set generator action on timer event: go high on counter empty */
-    ESP_ERROR_CHECK(mcpwm_generator_set_action_on_timer_event(generator,
-                                                              MCPWM_GEN_TIMER_EVENT_ACTION(MCPWM_TIMER_DIRECTION_UP, MCPWM_TIMER_EVENT_EMPTY, MCPWM_GEN_ACTION_HIGH)));
-    /*  Step 16: Set generator action on comparator event: go low on compare threshold */
-    ESP_ERROR_CHECK(mcpwm_generator_set_action_on_compare_event(generator,
-                                                                MCPWM_GEN_COMPARE_EVENT_ACTION(MCPWM_TIMER_DIRECTION_UP, comparator, MCPWM_GEN_ACTION_LOW)));
+	ESP_LOGI(TAG, "Set generator action on timer and compare event");
+	
+	/*/ Step 15: Set generator action on timer event: go high on counter empty */
+	ESP_ERROR_CHECK(mcpwm_generator_set_action_on_timer_event(generator,
+															MCPWM_GEN_TIMER_EVENT_ACTION(MCPWM_TIMER_DIRECTION_UP, MCPWM_TIMER_EVENT_EMPTY, MCPWM_GEN_ACTION_HIGH)));
+	/* Step 16: Set generator action on comparator event: go low on compare threshold */
+	ESP_ERROR_CHECK(mcpwm_generator_set_action_on_compare_event(generator,
+																MCPWM_GEN_COMPARE_EVENT_ACTION(MCPWM_TIMER_DIRECTION_UP, comparator, MCPWM_GEN_ACTION_LOW)));
 
-    ESP_LOGI(TAG, "Enable and start timer");
+	ESP_LOGI(TAG, "Enable and start timer");
 
-    /* Step 17: Enable the motor control PWM timer defined above */
-    ESP_ERROR_CHECK(mcpwm_timer_enable(timer));
+	/* Step 17: Enable the motor control PWM timer defined above */
+	ESP_ERROR_CHECK(mcpwm_timer_enable(timer));
 
-    /* Step 18: Send a command to motor control PWM timer to ask him to start counting and don't
-        stop until receives stop command, with the MCPWM_TIMER_START_NO_STOP command */
-    ESP_ERROR_CHECK(mcpwm_timer_start_stop(timer, MCPWM_TIMER_START_NO_STOP));
-    
-    ESP_LOGI(TAG, "********** app_main started");
-    // HTTP server instance handler (a void pointer)
-    static httpd_handle_t server = NULL;
+	/* Step 18: Send a command to motor control PWM timer to ask him to start counting and don't
+		stop until receives stop command, with the MCPWM_TIMER_START_NO_STOP command */
+	ESP_ERROR_CHECK(mcpwm_timer_start_stop(timer, MCPWM_TIMER_START_NO_STOP));
+	
+	ESP_LOGI(TAG, "********** app_main started");
+	// HTTP server instance handler (a void pointer)
+	static httpd_handle_t server = NULL;
 
 	// Calls a function to configure the GPIO pin for the LED
-    //configure_led();
-    //Initialize NVS
-    esp_err_t ret = nvs_flash_init();
-    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
-      ESP_ERROR_CHECK(nvs_flash_erase());
-      ret = nvs_flash_init();
-    }
-    ESP_ERROR_CHECK(ret);
+	//configure_led();
+	//Initialize NVS
+	esp_err_t ret = nvs_flash_init();
+	if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+	ESP_ERROR_CHECK(nvs_flash_erase());
+	ret = nvs_flash_init();
+	}
+	ESP_ERROR_CHECK(ret);
 
-    ESP_LOGI(TAG, "ESP_WIFI_MODE_AP");
-    /*  Configures and starts the Soft Access Point */
-    wifi_init_softap();
+	ESP_LOGI(TAG, "ESP_WIFI_MODE_AP");
+	/* Configures and starts the Soft Access Point */
+	wifi_init_softap();
 
-    /* Next line initializes the underlying TCP/IP stack. This function should be called exactly 
-       once from application code, when the application starts up. */
-    ESP_ERROR_CHECK(esp_netif_init());
+	/* Next line initializes the underlying TCP/IP stack. This function should be called exactly 
+	once from application code, when the application starts up. */
+	ESP_ERROR_CHECK(esp_netif_init());
 
-    /* Next line registers the event handler for the moment when a station connects and gets an IP
-       address */
-    ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, IP_EVENT_AP_STAIPASSIGNED, &connect_handler, &server));
-//    ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, WIFI_EVENT_STA_DISCONNECTED, &disconnect_handler, &server));
-    ESP_LOGI(TAG, "************* app_main ends");
+	/* Next line registers the event handler for the moment when a station connects and gets an IP
+	address */
+	ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, IP_EVENT_AP_STAIPASSIGNED, &connect_handler, &server));
+	// ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, WIFI_EVENT_STA_DISCONNECTED, &disconnect_handler, &server));
+	ESP_LOGI(TAG, "************* app_main ends");
 }
