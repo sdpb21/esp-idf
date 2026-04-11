@@ -30,32 +30,32 @@ using namespace std;
 #ifdef __cplusplus
 extern "C" {
 #endif
-    static const char *TAG = "wifi TAG:";
+	static const char *TAG = "wifi TAG:";
 
-    class WiFiClass{
-    public:
-        WiFiClass(wifi_mode_t wifi_mode, wifi_auth_mode_t auth_mode = WIFI_AUTH_WPA2_PSK);
-        void begin(string ssid, string password);
-        void ap_begin(string ssid, string password);
-        void ap_stop();
-        void disconnect();
-        uint32_t sta_status();
-        uint32_t ap_status();
-        void    start_scanning();
-        void    display_all_ap_info();
-        string  get_ssid_rssi();
-    private:
-        static wifi_config_t sta_config, ap_config;// Must be static for the esp-idf WiFi driver
-        static string _ssid, _password;
-        static string _ap_ssid, _ap_password;
-        static uint32_t   _sta_state, _ap_state;
-        uint16_t total_ap = DEFAULT_SCAN_LIST_SIZE;
-        wifi_ap_record_t ap_info[DEFAULT_SCAN_LIST_SIZE];
-        uint16_t ap_count = 0;
-        static void   wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data);
-        void print_auth_mode(int authmode);
-        void print_cipher_type(int pairwise_cipher, int group_cipher);
-    };
+	class WiFiClass{
+	public:
+		WiFiClass(wifi_mode_t wifi_mode, wifi_auth_mode_t auth_mode = WIFI_AUTH_WPA2_PSK);
+		void begin(string ssid, string password);
+		void ap_begin(string ssid, string password);
+		void ap_stop();
+		void disconnect();
+		uint32_t sta_status();
+		uint32_t ap_status();
+		void    start_scanning();
+		void    display_all_ap_info();
+		string  get_ssid_rssi();
+	private:
+		static wifi_config_t sta_config, ap_config;// Must be static for the esp-idf WiFi driver
+		static string _ssid, _password;
+		static string _ap_ssid, _ap_password;
+		static uint32_t   _sta_state, _ap_state;
+		uint16_t total_ap = DEFAULT_SCAN_LIST_SIZE;
+		wifi_ap_record_t ap_info[DEFAULT_SCAN_LIST_SIZE];
+		uint16_t ap_count = 0;
+		static void   wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data);
+		void print_auth_mode(int authmode);
+		void print_cipher_type(int pairwise_cipher, int group_cipher);
+	};
 #ifdef __cplusplus
 }
 #endif
