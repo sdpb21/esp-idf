@@ -6,6 +6,13 @@ Feature:
 Program:
 * [http_server_select.cpp](src/http_server_select.cpp): This example is intended for comprehensive and easy to understand the single-thread HTTP server with select.
 
+# HTTP server to control GPIO via webpage
+* ESP32 hosts an access point, access to the webpage via ``192.168.4.1:8000``
+* Webpage has JavaScript script to send GPIO status as HTTP request to HTTP server
+* HTTP server gets the GPIO status by parsing the HTTP header and body
+
+Program: [http_server_select_control_gpio.cpp](src/http_server_select_control_gpio.cpp)
+
 # A simple HTTP server with esp-idf built-in HTTP server library
 
 The ESP-IDF built-in HTTP server library is a single-threaded event-driven server which uses select() to monitor multiple connected HTTP client.

@@ -20,8 +20,8 @@
 
 #define TIMEOUT			5 // seconds
 
-#define SSID			"SSID"
-#define PASSWORD		"jnrn5941"
+#define SSID		"AP_SSID"
+#define PASSWORD	"AP_PASSWORD"
 
 extern "C" {
 	void app_main();
@@ -56,20 +56,17 @@ private:
 };
 
 void request_handler(string &request, string &response);
+vector<string> split_string_by_delim(string s, string delim);
 
 string request, response;
 HTTP_Server http_server(PORT, request_handler, request, response);
 SPIFFS spiffs;
 
 void app_main() {
-	WiFiClass WiFi(WIFI_MODE_STA);
-	WiFi.begin(SSID, PASSWORD);
+	WiFiClass WiFi(WIFI_MODE_AP);
+	WiFi.ap_begin(SSID, PASSWORD);
 
-	while (WiFi.sta_status() != WIFI_STA_CONNECTED) {
-		vTaskDelay(500 / portTICK_PERIOD_MS);
-		cout << ".";
-	}
-	cout << "\nWiFi connected\n";
+	ESP_LOGI(TAG, "wifi_init_softap finished. SSID:%s password:%s", SSID, PASSWORD);
 
 	http_server.start_server();
 }
@@ -170,25 +167,16 @@ void HTTP_Server::http_client_handler() {
 						int n = read(_http_client_fd, req_buf, BUFFSIZE);;
 						if (n <= 0) break;
 
-						_request.append(req_buf);
+						_request.append(req_buf, n);
 
 						if (_request.find("\r\n\r\n") != std::string::npos) break;
 					}
 
 					if (_request.size() > 0) {
 						_request_handler(_request, _response);
-
-						const char *content = _response.c_str();
-						const char *content_type = "text/html";
-						int rsp_buf_sz = _httpd_hdr_str.length() + strlen("200 OK") + strlen(content_type) + strlen("\r\n") + strlen(content);
-						char *res_buf = new char[rsp_buf_sz + 1];
-
-						memset(res_buf, 0, rsp_buf_sz + 1);
-						snprintf(res_buf, rsp_buf_sz, _httpd_hdr_str.c_str(), "200 OK", content_type, strlen(content));
-						strcat(res_buf, "\r\n");
-						strcat(res_buf, content);
-						write(_http_client_fd, res_buf, rsp_buf_sz);
-						delete[] res_buf;
+						if (!_response.empty()) {
+							write(_http_client_fd, _response.c_str(), _response.length());
+						}
 					} else {
 						vector<int>::iterator iter;
 						iter = find(_http_client_fd_list.begin(), _http_client_fd_list.end(), _http_client_fd);
@@ -241,10 +229,57 @@ int HTTP_Server::socket_parameters_init() {
 }
 
 void request_handler(string &request, string &response) {
-	char *read_file_string;
+	size_t get_request_index = request.find("GET");
+	size_t post_request_index = request.find("POST");
+	response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: ";
+	string content;
 
-	read_file_string = spiffs.read_file("index.html");
-	response = string(read_file_string);
+	vector<string> _req_buf_vec = split_string_by_delim(request, " ");
+	string uri = _req_buf_vec[1];
+
+	if (get_request_index != string::npos) {
+		if (uri == "/") {
+			string file_data = spiffs.read_file("index.html");
+			if (file_data != "NULL") content = file_data;
+			else content = "There is no index.html file";
+		} else {
+			content = "Unhandle URL " + uri;
+		}
+	}
+
+	if (post_request_index != string::npos) {
+		/* HTTP headers and body (content) is always defined by a delimiter \r\n\r\n */
+		size_t header_end = request.find("\r\n\r\n");
+
+		string headers = request.substr(0, header_end);
+		string body	= request.substr(header_end + 4);
+		cout << "GPIO status is: " << body << endl;
+	}
+
+	response += to_string(content.length()) + "\r\n\r\n" + content;
 
 	return;
+}
+
+vector<string> split_string_by_delim(string s, string delim) {
+	vector<string> all_substr;
+	size_t index = s.find(delim, 0);
+	string sub_str = s.substr(0, index);
+	string new_string = s.substr(index + delim.length());
+
+	while (index != string::npos) {
+		if (sub_str != delim && sub_str.size() >= 1) {
+			all_substr.push_back(sub_str);
+		}
+
+		index = new_string.find(delim, 0);
+		sub_str = new_string.substr(0, index);
+		new_string = new_string.substr(index + 1);
+	}
+
+	if (sub_str != delim && sub_str.size() >= 1) {
+		all_substr.push_back(sub_str);
+	}
+
+	return all_substr;
 }
